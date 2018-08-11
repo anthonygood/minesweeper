@@ -1,0 +1,21 @@
+{
+  "name": "lol-smash",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "matter-js": "^0.14.2",
+    "opentype.js": "^0.9.0",
+    "react": "^16.4.2",
+    "react-dom": "^16.4.2",
+    "vectorize-text": "^3.0.2"
+  },
+  "devDependencies": {
+    "react-scripts": "1.1.4"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  }
+}
