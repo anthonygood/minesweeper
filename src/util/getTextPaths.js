@@ -11,10 +11,7 @@ const getFont = font => new Promise((resolve, reject) => {
     })
 })
 
-const toPaths = (
-    string,
-    size
-) => font =>
+const toPaths = (string, size) => font =>
     font.getPaths(string, 50, 150, size)
 
 const getTextPaths = (

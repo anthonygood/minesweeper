@@ -11,8 +11,6 @@ const addWalls = (canvasWidth, canvasHeight) => world => {
 
     const wallWidth = 50
 
-    // const [ width, height ] = [ 50, height ]
-
     const left = Bodies.rectangle(
         0,
         canvasHeight / 2,

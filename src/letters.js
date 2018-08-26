@@ -1,13 +1,5 @@
 import {
-    Bodies,
     Body,
-    Composite,
-    Common,
-    Engine,
-    MouseConstraint,
-    Svg,
-    Render,
-    Runner,
     Vertices,
     World
 } from 'matter-js'
@@ -18,7 +10,7 @@ import _addWalls from './matter/addWalls'
 import setup from './matter/setup'
 import addMouseInteractivity from './matter/mouse'
 import awaken from './matter/awaken'
-import shakeScene from './matter/shakeScene'
+import cannonball from './matter/cannonball'
 
 const CANVAS_WIDTH = 800
 const CANVAS_HEIGHT = 600
@@ -60,26 +52,6 @@ const text = async () => {
     return getBodiesFromTextPaths(paths)
 }
 
-const cannonBall = () => {
-    return Bodies.circle(
-        CANVAS_WIDTH / 2,
-        CANVAS_HEIGHT - 30,
-        25,
-        {
-            density: 0.9,
-            friction: 0.01,
-            frictionAir: 0.0001,
-            restitution: 0.8,
-            isSleeping: true,
-            render: {
-                fillStyle: 'black',
-                strokeStyle: 'black',
-                lineWidth: 1
-            }
-        }
-    )
-}
-
 const draw = async canvas => {
     const { engine, world } = setupMatterJs(canvas)
 
@@ -90,7 +62,10 @@ const draw = async canvas => {
 
     World.add(
         world,
-        cannonBall()
+        cannonball(
+            CANVAS_WIDTH / 2,
+            CANVAS_HEIGHT - 30
+        )
     )
 
     // setTimeout(
