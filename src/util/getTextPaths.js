@@ -1,11 +1,11 @@
 import * as opentype from 'opentype.js'
 
-const DEFAULT_FONT = '../Roboto/Roboto-Bold.ttf'
-const DEFAULT_STRING = 'abcdefghijklmnopqrstuvwxyz'
-const DEFAULT_SIZE = 48
+const DEFAULT_FONT = '../Roboto/Roboto-Regular.ttf'
+const DEFAULT_STRING = 'lol wtf m8 u ok??? if u say so......lol'
+const DEFAULT_SIZE = 42
 
-const getFont = font => new Promise((resolve, reject) => {
-    opentype.load(font, (err, font) => {
+const getFont = () => new Promise((resolve, reject) => {
+    opentype.load(DEFAULT_FONT, (err, font) => {
         if (err) return reject(err)
         resolve(font)
     })
@@ -14,6 +14,12 @@ const getFont = font => new Promise((resolve, reject) => {
 const toPaths = (string, size) => font =>
     font.getPaths(string, 50, 150, size)
 
+const annotateWithLetter = string => paths =>
+    paths.map((path, i) => {
+        path.char = string[i]
+        return path
+    })
+
 const getTextPaths = (
     string = DEFAULT_STRING,
     size = DEFAULT_SIZE,
@@ -21,5 +27,6 @@ const getTextPaths = (
 ) =>
     getFont(font)
         .then(toPaths(string, size))
+        .then(annotateWithLetter(string))
 
 export default getTextPaths

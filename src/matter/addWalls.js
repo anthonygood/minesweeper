@@ -3,7 +3,7 @@ import {
     World
 } from 'matter-js'
 
-const addWalls = (canvasWidth, canvasHeight) => world => {
+const addWalls = (canvasWidth, canvasHeight, world) => {
     const options = {
         isStatic: true,
         // render: { visible: false }

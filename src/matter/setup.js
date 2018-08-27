@@ -18,6 +18,7 @@ const setupMatterJs = canvas => {
             width: 800,
             height: 600,
             background: 'white',
+            showAngleIndicator: true,
             showAxes: true,
             showCollisions: true,
             showConvexHulls: true,
@@ -29,7 +30,7 @@ const setupMatterJs = canvas => {
     const runner = Runner.create()
     Runner.run(runner, engine)
 
-    world.gravity.y = 0.05
+    world.gravity.y = 0.25
 
     return { engine, world }
 }
