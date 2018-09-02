@@ -10,13 +10,16 @@ const setupMatterJs = canvas => {
     const engine = Engine.create()
     const world = engine.world
 
-    const render = Render.create({
+    // Override Render.bodies to allow bodies to specify render func
+    require('./Render.bodies.override')
+
+    const renderOptions = Render.create({
         engine: engine,
         context: ctx,
         canvas,
         options: {
-            width: 800,
-            height: 600,
+            width: window.innerWidth,
+            height: window.innerHeight,
             background: 'white',
             showAngleIndicator: true,
             showAxes: true,
@@ -25,12 +28,14 @@ const setupMatterJs = canvas => {
             wireframes: false
         }
     })
+    Render.run(renderOptions)
 
-    Render.run(render)
     const runner = Runner.create()
     Runner.run(runner, engine)
 
-    world.gravity.y = 0.25
+    // const render = _render.bind(null, world, canvas, ctx)
+
+    // world.gravity.y = 0.25
 
     return { engine, world }
 }

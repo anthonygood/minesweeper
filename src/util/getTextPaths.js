@@ -1,12 +1,15 @@
 import * as opentype from 'opentype.js'
 
 const DEFAULT_FONT = '../Roboto/Roboto-Regular.ttf'
-const DEFAULT_STRING = 'lol wtf m8 u ok??? if u say so......lol'
-const DEFAULT_SIZE = 42
+const DEFAULT_STRING = 'this is A NICE and attractive txt ;))'
+export const DEFAULT_SIZE = 42
+
+export let gameFont
 
 const getFont = () => new Promise((resolve, reject) => {
     opentype.load(DEFAULT_FONT, (err, font) => {
         if (err) return reject(err)
+        gameFont = font
         resolve(font)
     })
 })
