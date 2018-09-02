@@ -8,7 +8,7 @@ import decomp from 'poly-decomp'
 
 import './pathseg'
 import getTextPaths from './util/getTextPaths'
-import renderLetter from './util/render'
+import { renderLetter } from './util/render'
 import {
     addMouseInteractivity,
     addWalls,
@@ -48,6 +48,7 @@ const getBodiesFromTextPaths = paths =>
         if (vertices.length < 1) return
 
         const options = {
+            render: { visible: false },
             isSleeping: true,
             restitution: 0.2,
             plugin: {
@@ -102,7 +103,7 @@ const draw = async canvas => {
         world,
         cannonball(
             CANVAS_WIDTH / 2,
-            CANVAS_HEIGHT - 30
+            CANVAS_HEIGHT - 50
         )
     )
 
@@ -111,10 +112,10 @@ const draw = async canvas => {
     //     2000
     // )
 
-    setTimeout(
-        awaken.bind(null, engine),
-        2000
-    )
+    // setTimeout(
+    //     awaken.bind(null, engine),
+    //     2000
+    // )
 }
 
 export default draw

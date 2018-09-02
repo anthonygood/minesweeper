@@ -7,7 +7,10 @@ import {
 // Returns object with engine and world properties.
 const setupMatterJs = canvas => {
     const ctx = canvas.getContext('2d')
-    const engine = Engine.create()
+    const engine = Engine.create({
+        // timing: { timeScale: 0.05 },
+        enableSleeping: true
+    })
     const world = engine.world
 
     // Override Render.bodies to allow bodies to specify render func
