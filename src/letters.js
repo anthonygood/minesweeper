@@ -47,34 +47,33 @@ const getBodiesFromTextPaths = paths =>
 
         if (vertices.length < 1) return
 
-        if (tryVerticesDirectly.includes(path.char)) return Body.create({
-            vertices,
+        const options = {
             isSleeping: true,
             restitution: 0.2,
-            position: {
-                x: x1 + ((x2 - x1) / 2),
-                y: y1 + ((y2 - y1) / 2)
-            },
             plugin: {
                 render: renderLetter,
                 char: path.char,
                 boundingBox
             }
-        })
+        }
+
+        if (tryVerticesDirectly.includes(path.char)) return Body.create(Object.assign(
+            {},
+            options,
+            {
+                vertices,
+                position: {
+                    x: x1 + ((x2 - x1) / 2),
+                    y: y1 + ((y2 - y1) / 2)
+                }
+            }
+        ))
 
         if (whitelist.includes(path.char)) return Bodies.fromVertices(
             x1 + ((x2 - x1) / 2),
             y1 + ((y2 - y1) / 2),
             vertices,
-            {
-                isSleeping: true,
-                restitution: 0.2,
-                plugin: {
-                    render: renderLetter,
-                    char: path.char,
-                    boundingBox
-                }
-            }
+            options
         )
 
         return Bodies.rectangle(
@@ -82,15 +81,7 @@ const getBodiesFromTextPaths = paths =>
             y1 + (y2 - y1) / 2,
             x2 - x1,
             y2 - y1,
-            {
-                isSleeping: true,
-                restitution: 0.2,
-                plugin: {
-                    render: renderLetter,
-                    char: path.char,
-                    boundingBox
-                }
-            }
+            options
         )
     }).filter(_ => _) // Whitespace returns undefined
 
