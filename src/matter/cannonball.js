@@ -1,7 +1,5 @@
 import { Bodies } from 'matter-js'
 
-import { renderEmoji } from '../util/render'
-
 const RADIUS = 25
 
 const cannonball = (x, y) => {
@@ -16,15 +14,11 @@ const cannonball = (x, y) => {
             restitution: 0.8,
             isSleeping: true,
             render: {
-                visible: false,
-                // fillStyle: 'black',
-                // strokeStyle: 'black',
-                // lineWidth: 1
-            },
-            plugin: {
-                render: renderEmoji,
-                emoji: '🤣', // rofl
-                size: RADIUS * 2
+                sprite: {
+                    texture: 'rofl.png',
+                    xScale: .35,
+                    yScale: .35
+                }
             }
         }
     )

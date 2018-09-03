@@ -54,45 +54,4 @@ const getOrigin = ({ min, max }) => {
     }
 }
 
-export const renderEmoji = (body, context) => {
-    const {
-        plugin: {
-            emoji,
-            size
-        },
-        angle,
-        bounds
-    } = body
-
-    const { min, max } = bounds
-    const { x, y } = getOrigin({ min, max })
-    const { width, height } = getWidthHeight({ min, max })
-
-    withContext(context, ctx => {
-        ctx.font = `${size}px Verdana`
-        ctx.fillStyle = 'rgba(255, 0, 0, 0.5)'
-        ctx.lineWidth = 3
-        ctx.translate(
-            min.x + x,
-            min.y + y
-        )
-        ctx.rotate(angle)
-        // ctx.fillRect(
-        //     0 - width / 2,
-        //     0 - height / 2,
-        //     width,
-        //     height
-        // )
-        ctx.fillStyle = 'rgba(0,0,0,1)'
-        ctx.fillText(
-            emoji,
-            -width / 2,
-            height / 2
-        )
-    })
-}
-
-export default {
-    renderLetter,
-    renderEmoji
-}
+export default { renderLetter }

@@ -1,7 +1,7 @@
 import * as opentype from 'opentype.js'
 
 const DEFAULT_FONT = '../Roboto/Roboto-Regular.ttf'
-const DEFAULT_STRING = 'this is A NICE and attractive txt ;))'
+const DEFAULT_STRING = 'looooool ;))'
 export const DEFAULT_SIZE = 42
 
 export let gameFont
