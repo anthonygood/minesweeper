@@ -1,6 +1,6 @@
 import { Bodies } from 'matter-js'
 
-const RADIUS = 25
+const RADIUS = 12
 
 const cannonball = (x, y) => {
     return Bodies.circle(
@@ -16,8 +16,8 @@ const cannonball = (x, y) => {
             render: {
                 sprite: {
                     texture: 'rofl.png',
-                    xScale: .35,
-                    yScale: .35
+                    xScale: .225,
+                    yScale: .225
                 }
             }
         }

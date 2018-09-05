@@ -1,8 +1,8 @@
 import * as opentype from 'opentype.js'
 
 const DEFAULT_FONT = '../Roboto/Roboto-Regular.ttf'
-const DEFAULT_STRING = 'looooool ;))'
-export const DEFAULT_SIZE = 42
+const DEFAULT_STRING = 'Firstly, we have to calculate a scale by which we will multiple all paths\' points, to get the actual point in space for the given font size.'
+export const DEFAULT_SIZE = 25
 
 export let gameFont
 

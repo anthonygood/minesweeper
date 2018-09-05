@@ -7,7 +7,7 @@ const addMouseInteractivity = (canvas, engine, world) => {
     const mouseConstraint = MouseConstraint.create(engine, {
         element: canvas,
         constraint: {
-            stiffness: 0.9,
+            stiffness: 0.2,
             render: {
                 visible: true
             }
@@ -15,6 +15,8 @@ const addMouseInteractivity = (canvas, engine, world) => {
     })
 
     World.add(world, mouseConstraint)
+
+    return mouseConstraint
 }
 
 export default addMouseInteractivity

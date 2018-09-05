@@ -1,6 +1,9 @@
 import {
     Body,
     Bodies,
+    Constraint,
+    Events,
+    Vector,
     Vertices,
     World
 } from 'matter-js'
@@ -27,9 +30,9 @@ const setupMatterJs = canvas => {
     const { engine, world } = setup(canvas)
 
     addWalls(CANVAS_WIDTH, CANVAS_HEIGHT, world)
-    addMouseInteractivity(canvas, engine, world)
+    const mouseConstraint = addMouseInteractivity(canvas, engine, world)
 
-    return { engine, world }
+    return { engine, world, mouseConstraint }
 }
 
 const tryVerticesDirectly = 'abdegijopqA468!#&?"=±;:'
@@ -48,7 +51,7 @@ const getBodiesFromTextPaths = paths =>
         if (vertices.length < 1) return
 
         const options = {
-            render: { visible: false },
+            // render: { visible: false },
             isSleeping: true,
             restitution: 0.2,
             plugin: {
@@ -91,8 +94,37 @@ const text = async () => {
     return getBodiesFromTextPaths(paths)
 }
 
-const draw = async canvas => {
-    const { engine, world } = setupMatterJs(canvas)
+// has the player released the ball from the sling?
+const haveSlung = (originX, originY) => ballConstraint => {
+    const ball = ballConstraint.bodyB
+    return ball.position.x > originX + 20 || ball.position.y < originY - 10
+}
+
+const createGame = async canvas => {
+    const { engine, mouseConstraint, world } = setupMatterJs(canvas)
+
+    // TODO:
+    // Move ball-constraining logic somewhere else
+    const ballOriginX = CANVAS_WIDTH / 2
+    const ballOriginY = CANVAS_HEIGHT - 150
+    let ball = cannonball(
+        ballOriginX,
+        ballOriginY
+    )
+    const ballConstraint = Constraint.create({
+        pointA: Vector.clone(ball.position),
+        bodyB: ball,
+        stiffness: 0.1,
+        length: 5,
+        render: {
+            visible: true
+        }
+    })
+    const _haveSlung = haveSlung(
+        ballOriginX,
+        ballOriginY
+    )
+    // end ball-constraining logic
 
     World.add(
         world,
@@ -101,11 +133,28 @@ const draw = async canvas => {
 
     World.add(
         world,
-        cannonball(
-            CANVAS_WIDTH / 2,
-            CANVAS_HEIGHT - 50
-        )
+        [
+            ball,
+            ballConstraint
+        ]
     )
+
+    // Event for slinging the emoji from the constraint
+    Events.on(engine, 'afterUpdate', function() {
+        if (mouseConstraint.mouse.button === -1 && _haveSlung(ballConstraint)) {
+            const newBall = cannonball(
+                ballOriginX,
+                ballOriginY
+            )
+            World.add(world, newBall)
+            ballConstraint.bodyB = newBall
+        }
+    });
+
+    // World.add(
+    //     world,
+    //     ball
+    // )
 
     // setTimeout(
     //     shakeScene.bind(null, engine),
@@ -118,4 +167,4 @@ const draw = async canvas => {
     // )
 }
 
-export default draw
+export default createGame
