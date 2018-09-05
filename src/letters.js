@@ -97,7 +97,17 @@ const text = async () => {
 // has the player released the ball from the sling?
 const haveSlung = (originX, originY) => ballConstraint => {
     const ball = ballConstraint.bodyB
+    if (!ball) return false
     return ball.position.x > originX + 20 || ball.position.y < originY - 10
+}
+
+const newBalls = (originX, originY, ballConstraint, world) => () => {
+    const newBall = cannonball(
+        originX,
+        originY
+    )
+    World.add(world, newBall)
+    ballConstraint.bodyB = newBall
 }
 
 const createGame = async canvas => {
@@ -142,12 +152,17 @@ const createGame = async canvas => {
     // Event for slinging the emoji from the constraint
     Events.on(engine, 'afterUpdate', function() {
         if (mouseConstraint.mouse.button === -1 && _haveSlung(ballConstraint)) {
-            const newBall = cannonball(
-                ballOriginX,
-                ballOriginY
+            ballConstraint.bodyB = null
+
+            setTimeout(
+                newBalls(
+                    ballOriginX,
+                    ballOriginY,
+                    ballConstraint,
+                    world
+                ),
+                3000
             )
-            World.add(world, newBall)
-            ballConstraint.bodyB = newBall
         }
     });
 
