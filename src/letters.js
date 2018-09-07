@@ -117,7 +117,7 @@ const createGame = async canvas => {
     // Move ball-constraining logic somewhere else
     const ballOriginX = CANVAS_WIDTH / 2
     const ballOriginY = CANVAS_HEIGHT - 150
-    let ball = cannonball(
+    const ball = cannonball(
         ballOriginX,
         ballOriginY
     )
@@ -127,7 +127,8 @@ const createGame = async canvas => {
         stiffness: 0.1,
         length: 5,
         render: {
-            visible: true
+            visible: true,
+            strokeStyle: 'black'
         }
     })
     const _haveSlung = haveSlung(
@@ -150,9 +151,17 @@ const createGame = async canvas => {
     )
 
     // Event for slinging the emoji from the constraint
-    Events.on(engine, 'afterUpdate', function() {
+    Events.on(engine, 'afterUpdate', () => {
         if (mouseConstraint.mouse.button === -1 && _haveSlung(ballConstraint)) {
-            ballConstraint.bodyB = null
+            ballConstraint.bodyB = Bodies.rectangle(
+                ballOriginX,
+                ballOriginY,
+                10,
+                20,
+                {
+                    isSleeping: true
+                }
+            )
 
             setTimeout(
                 newBalls(
@@ -164,12 +173,7 @@ const createGame = async canvas => {
                 3000
             )
         }
-    });
-
-    // World.add(
-    //     world,
-    //     ball
-    // )
+    })
 
     // setTimeout(
     //     shakeScene.bind(null, engine),

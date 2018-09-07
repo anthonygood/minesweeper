@@ -23,7 +23,7 @@ const setupMatterJs = canvas => {
         options: {
             width: window.innerWidth,
             height: window.innerHeight,
-            background: 'grey',
+            background: 'white',
             showAngleIndicator: true,
             showAxes: true,
             showCollisions: false,
