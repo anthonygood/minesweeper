@@ -15,10 +15,8 @@ import { renderLetter } from './util/render'
 import {
     addMouseInteractivity,
     addWalls,
-    awaken,
     cannonball,
-    setup,
-    shakeScene
+    setup
 } from './matter'
 
 window.decomp = decomp // Needed by matter.js
@@ -36,7 +34,7 @@ const setupMatterJs = canvas => {
 }
 
 const tryVerticesDirectly = 'abdegijopqA468!#&?"=±;:'
-const whitelist = 'abdefgjopqstxy234580,.-_~\'|]})<>|~@$§*_'
+const whitelist = 'abdefgjopqtxy234580,.-_~\'|]})<>|~@$§*_'
 
 // Uses Bodies.fromVertices which works with most letters generated from text paths.
 // In some cases directly using Body.create with vertices works better.
@@ -51,7 +49,7 @@ const getBodiesFromTextPaths = paths =>
         if (vertices.length < 1) return
 
         const options = {
-            // render: { visible: false },
+            render: { visible: false },
             isSleeping: true,
             restitution: 0.2,
             plugin: {
