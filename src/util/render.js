@@ -1,7 +1,21 @@
-import { gameFont, DEFAULT_SIZE } from './getTextPaths'
+import { getFont, g, DEFAULT_SIZE } from './getTextPaths'
 import withContext from './withContext'
 
-export const renderLetter = (body, context) => {
+const getOrigin = ({ min, max }) => {
+    const { width, height } = getWidthHeight({ min, max })
+
+    return {
+        x: width / 2,
+        y: height / 2
+    }
+}
+
+const getWidthHeight = ({ min, max }) => ({
+    width: max.x - min.x,
+    height: max.y - min.y
+})
+
+export const renderLetter = async (body, context) => {
     const {
         angle,
         plugin: {
@@ -24,34 +38,23 @@ export const renderLetter = (body, context) => {
     const { x, y } = getOrigin({ min, max })
     const { width, height } = getWidthHeight({ min, max })
 
+    const font = await getFont()
+
     withContext(context, ctx => {
         ctx.translate(
             min.x + x,
-            max.y - y
+            min.y + y
         )
         ctx.rotate(angle)
-        gameFont.draw(
+        font.draw(
             context,
             char,
             0 - width / 2,
             0 + height / 2,
+            // 0,
             size || DEFAULT_SIZE
         )
     })
-}
-
-const getWidthHeight = ({ min, max }) => ({
-    width: max.x - min.x,
-    height: max.y - min.y
-})
-
-const getOrigin = ({ min, max }) => {
-    const { width, height } = getWidthHeight({ min, max })
-
-    return {
-        x: width / 2,
-        y: height / 2
-    }
 }
 
 export default { renderLetter }

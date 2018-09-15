@@ -12,6 +12,8 @@ import decomp from 'poly-decomp'
 import './pathseg'
 import getTextPaths from './util/getTextPaths'
 import { renderLetter } from './util/render'
+import { renderBubble } from './util/renderTextBubble'
+import { percentX, percentY } from './util/percentXY'
 import {
     addMouseInteractivity,
     addWalls,
@@ -88,8 +90,10 @@ const getBodiesFromTextPaths = paths =>
     }).filter(_ => _) // Whitespace returns undefined
 
 const text = async () => {
-    const paths = await getTextPaths()
-    return getBodiesFromTextPaths(paths)
+    const paths = await Promise.all(getTextPaths())
+    return paths.map(getBodiesFromTextPaths)
+    // console.log('paths', paths)
+    // return getBodiesFromTextPaths(paths)
 }
 
 // has the player released the ball from the sling?
@@ -108,11 +112,11 @@ const newBalls = (originX, originY, ballConstraint, world) => () => {
     ballConstraint.bodyB = newBall
 }
 
-const createGame = async canvas => {
+const createGame = async (canvas, bkgCanvas) => {
     const { engine, mouseConstraint, world } = setupMatterJs(canvas)
 
-    // TODO:
-    // Move ball-constraining logic somewhere else
+    // // TODO:
+    // // Move ball-constraining logic somewhere else
     const ballOriginX = CANVAS_WIDTH / 2
     const ballOriginY = CANVAS_HEIGHT - 150
     const ball = cannonball(
@@ -135,9 +139,10 @@ const createGame = async canvas => {
     )
     // end ball-constraining logic
 
-    World.add(
-        world,
-        await text()
+    const t = await text()
+
+    t.forEach(line =>
+        World.add(world, line)
     )
 
     World.add(
