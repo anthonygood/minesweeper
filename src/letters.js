@@ -1,11 +1,11 @@
 import {
-    Body,
-    Bodies,
-    Constraint,
-    Events,
-    Vector,
-    Vertices,
-    World
+  Body,
+  Bodies,
+  Constraint,
+  Events,
+  Vector,
+  Vertices,
+  World
 } from 'matter-js'
 import decomp from 'poly-decomp'
 
@@ -15,24 +15,23 @@ import { renderLetter } from './util/render'
 import { renderBubble } from './util/renderTextBubble'
 import { percentX, percentY } from './util/percentXY'
 import {
-    addMouseInteractivity,
-    addWalls,
-    cannonball,
-    setup
+  addMouseInteractivity,
+  addWalls,
+  cannonball,
+  setup
 } from './matter'
-
-window.decomp = decomp // Needed by matter.js
 
 const CANVAS_WIDTH = window.innerWidth // 800
 const CANVAS_HEIGHT = window.innerHeight // 600
 
 const setupMatterJs = canvas => {
-    const { engine, world } = setup(canvas)
+  window.decomp = decomp // Needed by matter.js
+  const { engine, world } = setup(canvas)
 
-    addWalls(CANVAS_WIDTH, CANVAS_HEIGHT, world)
-    const mouseConstraint = addMouseInteractivity(canvas, engine, world)
+  addWalls(CANVAS_WIDTH, CANVAS_HEIGHT, world)
+  const mouseConstraint = addMouseInteractivity(canvas, engine, world)
 
-    return { engine, world, mouseConstraint }
+  return { engine, world, mouseConstraint }
 }
 
 const tryVerticesDirectly = 'abdegijopqA468!#&?"=±;:'
@@ -42,151 +41,130 @@ const whitelist = 'abdefgjopqtxy234580,.-_~\'|]})<>|~@$§*_'
 // In some cases directly using Body.create with vertices works better.
 // In others, fall back to bounding box.
 const getBodiesFromTextPaths = paths =>
-    paths.map(path => {
-        const boundingBox = path.getBoundingBox()
-        const { x1, x2, y1, y2 } = boundingBox
-        const pathData = path.toPathData()
-        const vertices = Vertices.fromPath(pathData)
+  paths.map(path => {
+    const boundingBox = path.getBoundingBox()
+    const { x1, x2, y1, y2 } = boundingBox
+    const pathData = path.toPathData()
+    const vertices = Vertices.fromPath(pathData)
 
-        if (vertices.length < 1) return
+    if (vertices.length < 1) return
 
-        const options = {
-            render: { visible: false },
-            isSleeping: true,
-            restitution: 0.2,
-            plugin: {
-                render: renderLetter,
-                char: path.char,
-                boundingBox
-            }
+    const options = {
+      render: { visible: false },
+      isSleeping: true,
+      restitution: 0.2,
+      plugin: {
+        render: renderLetter,
+        char: path.char,
+        boundingBox
+      }
+    }
+
+    if (tryVerticesDirectly.includes(path.char)) return Body.create(Object.assign(
+      {},
+      options,
+      {
+        vertices,
+        position: {
+          x: x1 + ((x2 - x1) / 2),
+          y: y1 + ((y2 - y1) / 2)
         }
+      }
+    ))
 
-        if (tryVerticesDirectly.includes(path.char)) return Body.create(Object.assign(
-            {},
-            options,
-            {
-                vertices,
-                position: {
-                    x: x1 + ((x2 - x1) / 2),
-                    y: y1 + ((y2 - y1) / 2)
-                }
-            }
-        ))
+    if (whitelist.includes(path.char)) return Bodies.fromVertices(
+      x1 + ((x2 - x1) / 2),
+      y1 + ((y2 - y1) / 2),
+      vertices,
+      options
+    )
 
-        if (whitelist.includes(path.char)) return Bodies.fromVertices(
-            x1 + ((x2 - x1) / 2),
-            y1 + ((y2 - y1) / 2),
-            vertices,
-            options
-        )
-
-        return Bodies.rectangle(
-            x1 + (x2 - x1) / 2,
-            y1 + (y2 - y1) / 2,
-            x2 - x1,
-            y2 - y1,
-            options
-        )
-    }).filter(_ => _) // Whitespace returns undefined
+    return Bodies.rectangle(
+      x1 + (x2 - x1) / 2,
+      y1 + (y2 - y1) / 2,
+      x2 - x1,
+      y2 - y1,
+      options
+    )
+  }).filter(_ => _) // Whitespace returns undefined
 
 const text = async () => {
-    const paths = await Promise.all(getTextPaths())
-    return paths.map(getBodiesFromTextPaths)
-    // console.log('paths', paths)
-    // return getBodiesFromTextPaths(paths)
+  const paths = await Promise.all(getTextPaths())
+  return paths.map(getBodiesFromTextPaths)
 }
 
 // has the player released the ball from the sling?
 const haveSlung = (originX, originY) => ballConstraint => {
-    const ball = ballConstraint.bodyB
-    if (!ball) return false
-    return ball.position.x > originX + 20 || ball.position.y < originY - 10
+  const ball = ballConstraint.bodyB
+  if (!ball) return false
+  return ball.position.x > originX + 20 || ball.position.y < originY - 10
 }
 
 const newBalls = (originX, originY, ballConstraint, world) => () => {
-    const newBall = cannonball(
-        originX,
-        originY
-    )
-    World.add(world, newBall)
-    ballConstraint.bodyB = newBall
+  const newBall = cannonball(originX, originY)
+  World.add(world, newBall)
+  ballConstraint.bodyB = newBall
 }
 
 const createGame = async (canvas, bkgCanvas) => {
-    const { engine, mouseConstraint, world } = setupMatterJs(canvas)
+  const { engine, mouseConstraint, world } = setupMatterJs(canvas)
 
-    // // TODO:
-    // // Move ball-constraining logic somewhere else
-    const ballOriginX = CANVAS_WIDTH / 2
-    const ballOriginY = CANVAS_HEIGHT - 150
-    const ball = cannonball(
+  // TODO:
+  // Move ball-constraining logic somewhere else
+  const ballOriginX = CANVAS_WIDTH / 2
+  const ballOriginY = CANVAS_HEIGHT - 150
+  const ball = cannonball(ballOriginX, ballOriginY)
+  const _haveSlung = haveSlung(ballOriginX, ballOriginY)
+
+  const ballConstraint = Constraint.create({
+      pointA: Vector.clone(ball.position),
+      bodyB: ball,
+      stiffness: 0.1,
+      length: 5,
+      render: {
+          visible: true,
+          strokeStyle: 'black'
+      }
+  })
+  // end ball-constraining logic
+
+  const t = await text()
+  t.forEach(line => World.add(world, line))
+
+  World.add(world, [ball, ballConstraint])
+
+  // Event for slinging the emoji from the constraint
+  Events.on(engine, 'afterUpdate', () => {
+    if (mouseConstraint.mouse.button === -1 && _haveSlung(ballConstraint)) {
+      ballConstraint.bodyB = Bodies.rectangle(
         ballOriginX,
-        ballOriginY
-    )
-    const ballConstraint = Constraint.create({
-        pointA: Vector.clone(ball.position),
-        bodyB: ball,
-        stiffness: 0.1,
-        length: 5,
-        render: {
-            visible: true,
-            strokeStyle: 'black'
-        }
-    })
-    const _haveSlung = haveSlung(
-        ballOriginX,
-        ballOriginY
-    )
-    // end ball-constraining logic
+        ballOriginY,
+        10,
+        20,
+        { isSleeping: true }
+      )
 
-    const t = await text()
+      setTimeout(
+        newBalls(
+          ballOriginX,
+          ballOriginY,
+          ballConstraint,
+          world
+        ),
+        3000
+      )
+    }
+  })
+  // const ctx = bkgCanvas.getContext('2d')
 
-    t.forEach(line =>
-        World.add(world, line)
-    )
-
-    World.add(
-        world,
-        [
-            ball,
-            ballConstraint
-        ]
-    )
-
-    // Event for slinging the emoji from the constraint
-    Events.on(engine, 'afterUpdate', () => {
-        if (mouseConstraint.mouse.button === -1 && _haveSlung(ballConstraint)) {
-            ballConstraint.bodyB = Bodies.rectangle(
-                ballOriginX,
-                ballOriginY,
-                10,
-                20,
-                {
-                    isSleeping: true
-                }
-            )
-
-            setTimeout(
-                newBalls(
-                    ballOriginX,
-                    ballOriginY,
-                    ballConstraint,
-                    world
-                ),
-                3000
-            )
-        }
-    })
-
-    // setTimeout(
-    //     shakeScene.bind(null, engine),
-    //     2000
-    // )
-
-    // setTimeout(
-    //     awaken.bind(null, engine),
-    //     2000
-    // )
+  // renderBubble(ctx)
+  // renderBubble(
+  //     ctx,
+  //     percentX(60),
+  //     percentY(20),
+  //     percentX(10),
+  //     percentY(10)
+  // )
 }
 
 export default createGame
