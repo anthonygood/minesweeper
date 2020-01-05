@@ -1,6 +1,7 @@
+import { CANVAS_HEIGHT, CANVAS_WIDTH } from '../game-logic/canvas/sizes'
+
 const percent = size => percent =>
   Math.round(percent / 100 * size)
 
-// TODO fixme
-export const percentX = percent(window.innerWidth)
-export const percentY = percent(window.innerHeight)
+export const percentX = percent(CANVAS_WIDTH)
+export const percentY = percent(CANVAS_HEIGHT)

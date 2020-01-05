@@ -54,7 +54,7 @@ const createGame = async (canvas, bkgCanvas) => {
   // TODO:
   // Move ball-constraining logic somewhere else
   const ballOriginX = CANVAS_WIDTH / 2
-  const ballOriginY = CANVAS_HEIGHT - 150
+  const ballOriginY = CANVAS_HEIGHT - percentY(15)
   const ball = cannonball(ballOriginX, ballOriginY)
   const _haveSlung = haveSlung(ballOriginX, ballOriginY)
 
