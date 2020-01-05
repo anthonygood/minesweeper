@@ -9,34 +9,34 @@ export const DEFAULT_SIZE = 24
 let gameFont
 
 export const getFont = () => gameFont = gameFont || new Promise((resolve, reject) => {
-    opentype.load(DEFAULT_FONT, (err, font) => {
-        if (err) return reject(err)
-        resolve(font)
-    })
+  opentype.load(DEFAULT_FONT, (err, font) => {
+    if (err) return reject(err)
+    resolve(font)
+  })
 })
 
 const toPaths = (string, size, x = 80, y = 110) => font =>
-    font.getPaths(string, x, y, size)
+  font.getPaths(string, x, y, size)
 
 const annotateWithLetter = string => paths =>
-    paths.map((path, i) => {
-        path.char = string[i]
-        return path
-    })
+  paths.map((path, i) => {
+    path.char = string[i]
+    return path
+  })
 
 const line = (string, y) =>
-    getFont()
-        .then(toPaths(string, DEFAULT_SIZE, 80, y))
-        .then(annotateWithLetter(string))
+  getFont()
+    .then(toPaths(string, DEFAULT_SIZE, 80, y))
+    .then(annotateWithLetter(string))
 
 const getTextPaths = (
-    string = DEFAULT_STRING,
-    size = DEFAULT_SIZE,
-    font = DEFAULT_FONT
+  string = DEFAULT_STRING,
+  size = DEFAULT_SIZE,
+  font = DEFAULT_FONT
 ) => [
-    line(DEFAULT_STRING, 110),
-    line(SECOND_STRING, 132),
-    line(THIRD_STRING, 154)
+  line(DEFAULT_STRING, 110),
+  line(SECOND_STRING, 132),
+  line(THIRD_STRING, 154)
 ]
 
 export default getTextPaths
