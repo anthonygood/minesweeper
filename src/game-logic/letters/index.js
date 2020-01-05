@@ -1,25 +1,23 @@
 import {
-  Body,
   Bodies,
   Constraint,
   Events,
   Vector,
-  Vertices,
   World
 } from 'matter-js'
 import decomp from 'poly-decomp'
 
-import './pathseg'
-import getTextPaths from './util/getTextPaths'
-import { renderLetter } from './util/render'
-import { renderBubble } from './util/renderTextBubble'
-import { percentX, percentY } from './util/percentXY'
+import '../../pathseg'
+import getTextPaths from '../../util/getTextPaths'
+import { renderBubble } from '../../util/renderTextBubble'
+import { percentX, percentY } from '../../util/percentXY'
 import {
   addMouseInteractivity,
   addWalls,
   cannonball,
   setup
-} from './matter'
+} from '../../matter'
+import getBodiesFromTextPaths from './getBodiesFromTextPaths'
 
 const CANVAS_WIDTH = window.innerWidth // 800
 const CANVAS_HEIGHT = window.innerHeight // 600
@@ -34,60 +32,6 @@ const setupMatterJs = canvas => {
   return { engine, world, mouseConstraint }
 }
 
-const tryVerticesDirectly = 'abdegijopqA468!#&?"=±;:'
-const whitelist = 'abdefgjopqtxy234580,.-_~\'|]})<>|~@$§*_'
-
-// Uses Bodies.fromVertices which works with most letters generated from text paths.
-// In some cases directly using Body.create with vertices works better.
-// In others, fall back to bounding box.
-const getBodiesFromTextPaths = paths =>
-  paths.map(path => {
-    const boundingBox = path.getBoundingBox()
-    const { x1, x2, y1, y2 } = boundingBox
-    const pathData = path.toPathData()
-    const vertices = Vertices.fromPath(pathData)
-
-    if (vertices.length < 1) return
-
-    const options = {
-      render: { visible: false },
-      isSleeping: true,
-      restitution: 0.2,
-      plugin: {
-        render: renderLetter,
-        char: path.char,
-        boundingBox
-      }
-    }
-
-    if (tryVerticesDirectly.includes(path.char)) return Body.create(Object.assign(
-      {},
-      options,
-      {
-        vertices,
-        position: {
-          x: x1 + ((x2 - x1) / 2),
-          y: y1 + ((y2 - y1) / 2)
-        }
-      }
-    ))
-
-    if (whitelist.includes(path.char)) return Bodies.fromVertices(
-      x1 + ((x2 - x1) / 2),
-      y1 + ((y2 - y1) / 2),
-      vertices,
-      options
-    )
-
-    return Bodies.rectangle(
-      x1 + (x2 - x1) / 2,
-      y1 + (y2 - y1) / 2,
-      x2 - x1,
-      y2 - y1,
-      options
-    )
-  }).filter(_ => _) // Whitespace returns undefined
-
 const text = async () => {
   const paths = await Promise.all(getTextPaths())
   return paths.map(getBodiesFromTextPaths)
@@ -100,10 +44,10 @@ const haveSlung = (originX, originY) => ballConstraint => {
   return ball.position.x > originX + 20 || ball.position.y < originY - 10
 }
 
-const newBalls = (originX, originY, ballConstraint, world) => () => {
-  const newBall = cannonball(originX, originY)
-  World.add(world, newBall)
-  ballConstraint.bodyB = newBall
+const newBall = (originX, originY, ballConstraint, world) => () => {
+  const ball = cannonball(originX, originY)
+  World.add(world, ball)
+  ballConstraint.bodyB = ball
 }
 
 const createGame = async (canvas, bkgCanvas) => {
@@ -117,14 +61,14 @@ const createGame = async (canvas, bkgCanvas) => {
   const _haveSlung = haveSlung(ballOriginX, ballOriginY)
 
   const ballConstraint = Constraint.create({
-      pointA: Vector.clone(ball.position),
-      bodyB: ball,
-      stiffness: 0.1,
-      length: 5,
-      render: {
-          visible: true,
-          strokeStyle: 'black'
-      }
+    pointA: Vector.clone(ball.position),
+    bodyB: ball,
+    stiffness: 0.1,
+    length: 5,
+    render: {
+      visible: true,
+      strokeStyle: 'black'
+    }
   })
   // end ball-constraining logic
 
@@ -145,7 +89,7 @@ const createGame = async (canvas, bkgCanvas) => {
       )
 
       setTimeout(
-        newBalls(
+        newBall(
           ballOriginX,
           ballOriginY,
           ballConstraint,
