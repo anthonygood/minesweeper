@@ -13,7 +13,6 @@ const whitelist = 'abdefgjopqtxy234580,.-_~\'|]})<>|~@$§*_'
 // In others, fall back to bounding box.
 const getBodyFromTextPath = path => {
   const boundingBox = path.getBoundingBox()
-  const { x1, x2, y1, y2 } = boundingBox
   const pathData = path.toPathData()
   const vertices = Vertices.fromPath(pathData)
 
@@ -29,6 +28,8 @@ const getBodyFromTextPath = path => {
       boundingBox
     }
   }
+
+  const { x1, x2, y1, y2 } = boundingBox
 
   if (tryVerticesDirectly.includes(path.char)) return Body.create(Object.assign(
     {},

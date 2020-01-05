@@ -4,6 +4,8 @@ import {
     Runner
 } from 'matter-js'
 
+import { CANVAS_HEIGHT, CANVAS_WIDTH } from '../game-logic/canvas/sizes'
+
 // Returns object with engine and world properties.
 const setupMatterJs = canvas => {
     const ctx = canvas.getContext('2d')
@@ -21,8 +23,8 @@ const setupMatterJs = canvas => {
         context: ctx,
         canvas,
         options: {
-            width: window.innerWidth,
-            height: window.innerHeight,
+            width: CANVAS_WIDTH,
+            height: CANVAS_HEIGHT,
             background: 'transparent',
             showAngleIndicator: true,
             showAxes: true,
@@ -35,10 +37,6 @@ const setupMatterJs = canvas => {
 
     const runner = Runner.create()
     Runner.run(runner, engine)
-
-    // const render = _render.bind(null, world, canvas, ctx)
-
-    // world.gravity.y = 0.25
 
     return { engine, world }
 }

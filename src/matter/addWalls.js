@@ -9,7 +9,7 @@ const addWalls = (canvasWidth, canvasHeight, world) => {
         // render: { visible: false }
     }
 
-    const wallWidth = 50
+    const wallWidth = 25
 
     const left = Bodies.rectangle(
         0,
@@ -43,7 +43,7 @@ const addWalls = (canvasWidth, canvasHeight, world) => {
     World.add(world, left)
     World.add(world, right)
     World.add(world, top)
-    World.add(world, bot)
+    // World.add(world, bot)
 }
 
 export default addWalls

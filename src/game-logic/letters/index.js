@@ -18,9 +18,7 @@ import {
   setup
 } from '../../matter'
 import getBodiesFromTextPaths from './getBodiesFromTextPaths'
-
-const CANVAS_WIDTH = window.innerWidth // 800
-const CANVAS_HEIGHT = window.innerHeight // 600
+import { CANVAS_HEIGHT, CANVAS_WIDTH } from '../canvas/sizes'
 
 const setupMatterJs = canvas => {
   window.decomp = decomp // Needed by matter.js
