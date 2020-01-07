@@ -3,12 +3,12 @@ import {
   Bodies,
   Vertices
 } from 'matter-js'
-import { renderLetter } from '../../util/render'
+import { renderLetter } from './render'
 
 const tryVerticesDirectly = 'abdegijopqA468!#&?"=±;:'
-const whitelist = 'abdefgjopqtxy234580,.-_~\'|]})<>|~@$§*_'
+const whitelist = 'abdegjopqxy234580,.-_~\'|]})<>|~@$§*_'
 
-// Uses Bodies.fromVertices which works with most letters generated from text paths.
+// Uses Bodies.fromVertices which works with some letters generated from text paths.
 // In some cases directly using Body.create with vertices works better.
 // In others, fall back to bounding box.
 const getBodyFromTextPath = path => {
@@ -19,7 +19,7 @@ const getBodyFromTextPath = path => {
   if (vertices.length < 1) return
 
   const options = {
-    render: { visible: false },
+    render: { visible: true },
     isSleeping: true,
     restitution: 0.2,
     plugin: {

@@ -1,5 +1,11 @@
-import { getFont, DEFAULT_SIZE } from './getTextPaths'
-import withContext from './withContext'
+import { getFont } from './getTextPaths'
+import { DEFAULT_TEXT_SIZE } from '../canvas/sizes'
+import withContext from '../../util/withContext'
+
+const getWidthHeight = ({ min, max }) => ({
+  width: max.x - min.x,
+  height: max.y - min.y
+})
 
 const getOrigin = ({ min, max }) => {
   const { width, height } = getWidthHeight({ min, max })
@@ -10,18 +16,13 @@ const getOrigin = ({ min, max }) => {
   }
 }
 
-const getWidthHeight = ({ min, max }) => ({
-  width: max.x - min.x,
-  height: max.y - min.y
-})
-
 export const renderLetter = async (body, context) => {
   const {
     angle,
     plugin: {
       char,
-      boundingBox,
-      size
+      // boundingBox,
+      size = DEFAULT_TEXT_SIZE
     }
   } = body
 
@@ -35,7 +36,7 @@ export const renderLetter = async (body, context) => {
   // and use the physics model's bounds (which aren't as neatly aligned for prose).
   // const x = body.isSleeping ? boundingBox.x1 : min.x
   // const y = body.isSleeping ? boundingBox.y2 : max.y
-
+  // const xyBounds = { x: (boundingBox.x2 - boundingBox.x1) / 2, y: (boundingBox.y2 - boundingBox.y1) / 2 }
   const { x, y } = getOrigin({ min, max })
   const { width, height } = getWidthHeight({ min, max })
 
@@ -52,8 +53,7 @@ export const renderLetter = async (body, context) => {
       char,
       0 - width / 2,
       0 + height / 2,
-      // 0,
-      size || DEFAULT_SIZE
+      size
     )
   })
 }
