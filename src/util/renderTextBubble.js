@@ -1,13 +1,14 @@
+import { CANVAS_HEIGHT, CANVAS_WIDTH } from '../game-logic/canvas/sizes'
+
 export const messageBubble = (
   bubbleWidth = 200,
   bubbleHeight = 100,
-  canvasWidth = window.innerWidth,
-  canvasHeight = window.innerHeight
+  canvasWidth = CANVAS_WIDTH,
+  canvasHeight = CANVAS_HEIGHT
 ) =>
 `<svg xmlns="http://www.w3.org/2000/svg" width="${canvasWidth}" height="${canvasHeight}">
 <foreignObject width="100%" height="100%">
-  <div class="MessageBubble" xmlns="http://www.w3.org/1999/xhtml">
-  </div>
+  <div class="MessageBubble" xmlns="http://www.w3.org/1999/xhtml"></div>
   <style>
     .MessageBubble {
       margin: 0;

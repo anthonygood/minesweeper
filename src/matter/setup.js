@@ -18,7 +18,7 @@ const setupMatterJs = canvas => {
     // Override Render.bodies to allow bodies to specify render func
     require('./Render.bodies.override')
 
-    const renderOptions = Render.create({
+    const render = Render.create({
         engine: engine,
         context: ctx,
         canvas,
@@ -28,17 +28,16 @@ const setupMatterJs = canvas => {
             background: 'transparent',
             showAngleIndicator: true,
             showAxes: true,
-            showCollisions: false,
+            showCollisions: true,
             showConvexHulls: true,
             wireframes: false
         }
     })
-    Render.run(renderOptions)
 
-    const runner = Runner.create()
-    Runner.run(runner, engine)
+    Render.run(render)
+    Runner.run(Runner.create(), engine)
 
-    return { engine, world }
+    return { engine, render, world }
 }
 
 export default setupMatterJs
