@@ -6,20 +6,20 @@ import {
 const addWalls = (canvasWidth, canvasHeight, world) => {
     const options = {
         isStatic: true,
-        // render: { visible: false }
+        render: { visible: false }
     }
 
-    const wallWidth = 25
+    const wallWidth = 50
 
     const left = Bodies.rectangle(
-        0,
+        -wallWidth,
         canvasHeight / 2,
         wallWidth,
         canvasHeight,
         options
     )
     const right = Bodies.rectangle(
-        canvasWidth,
+        canvasWidth + wallWidth,
         canvasHeight / 2,
         wallWidth,
         canvasHeight,
@@ -27,7 +27,7 @@ const addWalls = (canvasWidth, canvasHeight, world) => {
     )
     const top = Bodies.rectangle(
         canvasWidth / 2,
-        0,
+        -wallWidth,
         canvasWidth,
         wallWidth,
         options
