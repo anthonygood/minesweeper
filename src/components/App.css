@@ -1,5 +1,9 @@
 .App {
-  text-align: center;
+  /* text-align: center; */
+}
+
+#bkg-canvas {
+  background-color: #00ffe7;
 }
 
 .App-logo {

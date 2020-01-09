@@ -19,7 +19,7 @@ const getBodyFromTextPath = path => {
   if (vertices.length < 1) return
 
   const options = {
-    render: { visible: true },
+    render: { visible: false },
     isSleeping: true,
     restitution: 0.2,
     plugin: {
@@ -31,17 +31,14 @@ const getBodyFromTextPath = path => {
 
   const { x1, x2, y1, y2 } = boundingBox
 
-  if (tryVerticesDirectly.includes(path.char)) return Body.create(Object.assign(
-    {},
-    options,
-    {
-      vertices,
-      position: {
-        x: x1 + ((x2 - x1) / 2),
-        y: y1 + ((y2 - y1) / 2)
-      }
+  if (tryVerticesDirectly.includes(path.char)) return Body.create({
+    ...options,
+    vertices,
+    position: {
+      x: x1 + ((x2 - x1) / 2),
+      y: y1 + ((y2 - y1) / 2)
     }
-  ))
+  })
 
   if (whitelist.includes(path.char)) return Bodies.fromVertices(
     x1 + ((x2 - x1) / 2),
