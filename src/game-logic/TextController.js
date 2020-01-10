@@ -1,7 +1,6 @@
 import { World } from 'matter-js'
-import { getFont, gameFontSync } from './letters/getTextPaths'
-import { getTextPathsSync } from './letters/getTextPaths'
-import { getTextSync } from './letters/getText'
+import { getFont } from './letters/getTextPaths'
+import getText from './letters/getText'
 import { renderBubble } from './canvas/renderTextBubble'
 import { DEFAULT_TEXT_SIZE, DEFAULT_LINE_HEIGHT } from './canvas/sizes'
 
@@ -43,7 +42,7 @@ class TextController {
   render({ lines, x, y, size = DEFAULT_TEXT_SIZE, lineheight = DEFAULT_LINE_HEIGHT }) {
     const { canvas, world } = this
 
-    const text = getTextSync(lines, x, y, size, lineheight)
+    const text = getText(lines, x, y, size, lineheight)
 
     text.forEach(line => {
       line.forEach(body => this.bodies.push(body))
