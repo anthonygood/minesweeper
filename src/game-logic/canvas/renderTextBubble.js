@@ -1,14 +1,27 @@
-import { CANVAS_HEIGHT, CANVAS_WIDTH } from './sizes'
-
 const CALLOUT_SIZE = 20
 const BORDER_WIDTH = 3
+const PADDING = 15
 const border = `${BORDER_WIDTH}px solid #03988a`
 
+const innerSize = width => width + PADDING * 2
+const outerWidth = width => innerSize(width) + BORDER_WIDTH * 2
+const outerHeight = height => innerSize(height) + CALLOUT_SIZE + BORDER_WIDTH * 2
+
+const getBubbleSizeForTextBounds = ({ min, max }) => ({
+  width: innerSize(max.x - min.x),
+  height: innerSize(max.y - min.y)
+})
+
+const getBubbleOriginForTextBounds = ({ min }) => ({
+  x: min.x - BORDER_WIDTH - PADDING,
+  y: min.y - BORDER_WIDTH - PADDING
+})
+
 export const messageBubble = (
-  width = 200,
-  height = 100,
-  canvasWidth = width + BORDER_WIDTH * 2,
-  canvasHeight = height + CALLOUT_SIZE + BORDER_WIDTH * 2
+  width,
+  height,
+  canvasWidth = outerWidth(width),
+  canvasHeight = outerHeight(height)
 ) =>
 `<svg xmlns="http://www.w3.org/2000/svg" width="${canvasWidth}" height="${canvasHeight}">
 <foreignObject width="100%" height="100%">
@@ -43,13 +56,10 @@ export const messageBubble = (
 </svg>
 `
 
-export const renderBubble = (
-  ctx,
-  width,
-  height,
-  x = 0,
-  y = 0
-) => {
+export const renderBubble = (ctx, bounds) => {
+  const { height, width } = getBubbleSizeForTextBounds(bounds)
+  const { x, y } = getBubbleOriginForTextBounds(bounds)
+
   const bubble = messageBubble(width, height)
   const encodedBubble = encodeURIComponent(bubble)
 
