@@ -34,7 +34,7 @@ class App extends Component {
     new GameController(
       document.getElementById('main-canvas'),
       document.getElementById('bkg-canvas')
-    )
+    ).start()
   }
 }
 
