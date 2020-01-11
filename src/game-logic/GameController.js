@@ -33,6 +33,7 @@ class GameController {
     this.ball = new BallController(world, ballOriginX, ballOriginY, NEW_BALL_DELAY)
     this.text = new TextController(world, bkgCanvas, messages)
     this.lastTick = null
+    this.paused = false
   }
 
   async load() {
@@ -45,6 +46,9 @@ class GameController {
     const { canvas, engine, world } = this
     this.mouseConstraint = addMouseInteractivity(canvas, engine, world)
     addWalls(CANVAS_WIDTH, CANVAS_HEIGHT, world)
+
+    document.addEventListener('keydown', ({ code }) => code === 'Space' && this.togglePause())
+
     this.tick()
   }
 
@@ -52,9 +56,13 @@ class GameController {
     const {
       ball,
       mouseConstraint,
+      paused,
       render,
       text
     } = this
+
+    requestAnimationFrame(() => this.tick())
+    if (paused) return
 
     this.updateEngine()
 
@@ -62,7 +70,6 @@ class GameController {
     ball.tick(mouseup)
     text.tick()
     Render.world(render)
-    requestAnimationFrame(() => this.tick())
   }
 
   updateEngine() {
@@ -74,6 +81,15 @@ class GameController {
     const delta = thisTick - lastTick
     this.lastTick = thisTick
     Engine.update(engine, delta)
+  }
+
+  onKeyDown({ code }) {
+    return code === 'Space' && this.togglePause()
+  }
+
+  togglePause() {
+    this.paused = !this.paused
+    this.lastTick = Date.now()
   }
 }
 
