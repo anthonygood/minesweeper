@@ -2,17 +2,23 @@ import { World, Body } from 'matter-js'
 import { getFont } from './letters/getTextPaths'
 import getText from './letters/getText'
 import { renderBubble } from './canvas/renderTextBubble'
-import { DEFAULT_TEXT_SIZE, DEFAULT_LINE_HEIGHT, CANVAS_WIDTH } from './canvas/sizes'
+import {
+  CANVAS_WIDTH,
+  DEFAULT_TEXT_SIZE,
+  DEFAULT_LINE_HEIGHT,
+  MESSAGE_BUBBLE_WIDTH
+} from './canvas/sizes'
 
-const scroll = body => Body.translate(body, { x: 0, y: 1 })
+// NB frame-rate bound?
+const crawl = body => Body.translate(body, { x: 0, y: 2 })
 
 export const getOuterBounds = bounds => bounds.reduce(
   (acc, item) => {
     const { min: minA, max: maxA } = acc
     const { min: minB, max: maxB } = Array.isArray(item) ? getOuterBounds(item) : item
     return {
-      min: { x: 40, y: Math.min(minA.y, minB.y) },
-      max: { x: CANVAS_WIDTH - 50, y: Math.max(maxA.y, maxB.y) },
+      min: { x: MESSAGE_BUBBLE_WIDTH, y: Math.min(minA.y, minB.y) },
+      max: { x: CANVAS_WIDTH - 50,    y: Math.max(maxA.y, maxB.y) },
     }
   },
   {
@@ -22,11 +28,12 @@ export const getOuterBounds = bounds => bounds.reduce(
 )
 
 class TextController {
-  constructor(world, canvas, strings) {
+  constructor(world, canvas, messages) {
     this.loaded = false
     this.canvas = canvas
     this.world = world
-    this.strings = strings
+    this.messages = messages
+    this.currentMessage = null
     this.bodies = []
   }
 
@@ -36,36 +43,60 @@ class TextController {
   }
 
   tick() {
-    this.bodies.filter(_ => _.isSleeping).forEach(scroll)
+    const { canvas } = this
+    const { min } = this.getSleepingBodyBounds()
+    const crawledBottom = min.y > canvas.height
+    if (!this.currentMessage || crawledBottom) return this.nextMessage()
+    this.crawl()
+  }
 
-    const bodyBounds = this.bodies.filter(_ => _.isSleeping).map(_ => _.bounds)
+  // Text itself is rendered via homebrew matterjs plugin,
+  // Text bubble is rendered onto (background) canvas once separately.
+  nextMessage({ x = 50, y = 125, size = DEFAULT_TEXT_SIZE, lineheight = DEFAULT_LINE_HEIGHT } = {}) {
+    const { canvas, world } = this
+    this.currentMessage = this.messages.pop()
+
+    if (!this.currentMessage) return false
+
+    // TODO: collect garbage
+    this.bodies.forEach(body => World.remove(world, body))
+    this.bodies = []
+
+    getText(this.currentMessage, x, y, size, lineheight)
+      .forEach(line => {
+        line.forEach(body => this.bodies.push(body))
+        World.add(world, line)
+      })
+
+    renderBubble(
+      canvas.getContext('2d'),
+      this.getSleepingBodyBounds()
+    )
+
+    return true
+  }
+
+  crawl() {
+    this.getSleepingBodies().forEach(crawl)
 
     const { canvas } = this
     const ctx = canvas.getContext('2d')
 
     renderBubble(
       ctx,
-      getOuterBounds(bodyBounds),
+      this.getSleepingBodyBounds(),
       () => ctx.clearRect(0, 0, canvas.width, canvas.height)
     )
   }
 
-  // Text itself is rendered via homebrew matterjs plugin,
-  // Text bubble is rendered onto (background) canvas once separately.
-  start({ lines, x, y, size = DEFAULT_TEXT_SIZE, lineheight = DEFAULT_LINE_HEIGHT }) {
-    const { canvas, world } = this
-
-    const text = getText(lines, x, y, size, lineheight)
-    text.forEach(line => {
-      line.forEach(body => this.bodies.push(body))
-      World.add(world, line)
-    })
-
-    const allBounds = text.map(line => line.map(_ => _.bounds))
-    renderBubble(
-      canvas.getContext('2d'),
-      getOuterBounds(allBounds)
+  getSleepingBodyBounds() {
+    return getOuterBounds(
+      this.getSleepingBodies().map(_ => _.bounds)
     )
+  }
+
+  getSleepingBodies() {
+    return this.bodies.filter(_ => _.isSleeping)
   }
 }
 

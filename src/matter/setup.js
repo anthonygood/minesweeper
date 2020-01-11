@@ -34,9 +34,6 @@ const setupMatterJs = canvas => {
     }
   })
 
-  Render.run(render)
-  Runner.run(Runner.create(), engine)
-
   return { engine, render, world }
 }
 

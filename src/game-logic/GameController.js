@@ -1,4 +1,4 @@
-import { Events } from 'matter-js'
+import { Engine, Render } from 'matter-js'
 import decomp from 'poly-decomp'
 import {
   addMouseInteractivity,
@@ -12,19 +12,27 @@ import TextController from './TextController'
 
 const NEW_BALL_DELAY = 3000
 
+const messages = [
+  ['u ok hun??', 'lolololol jk'],
+  ['wtf no way thatsnot true'],
+  ['wtf srsly m88 ... wtf lol????'],
+]
+
 class GameController {
   constructor(canvas, bkgCanvas) {
-    // Set up matter's built-in renderer and runner
+    // Set up matter's built-in renderer
     window.decomp = decomp // Needed by matter.js
-    const { engine, world } = setup(canvas)
+    const { engine, render, world } = setup(canvas)
 
     this.engine = engine
+    this.render = render
     this.world = world
 
     const ballOriginX = CANVAS_WIDTH - percentX(50)
     const ballOriginY = CANVAS_HEIGHT - percentY(15)
     this.ball = new BallController(world, ballOriginX, ballOriginY, NEW_BALL_DELAY)
-    this.text = new TextController(world, bkgCanvas)
+    this.text = new TextController(world, bkgCanvas, messages)
+    this.lastTick = null
   }
 
   async load() {
@@ -37,16 +45,35 @@ class GameController {
     const { canvas, engine, world } = this
     this.mouseConstraint = addMouseInteractivity(canvas, engine, world)
     addWalls(CANVAS_WIDTH, CANVAS_HEIGHT, world)
-    Events.on(engine, 'afterUpdate', () => this.tick())
-
-    this.text.start({ lines: ['u ok hun??'], x: 50, y: 50, size: 24, lineheight: 36 })
+    this.tick()
   }
 
   tick() {
-    const { ball, mouseConstraint, text } = this
+    const {
+      ball,
+      mouseConstraint,
+      render,
+      text
+    } = this
+
+    this.updateEngine()
+
     const mouseup = mouseConstraint.mouse.button === -1
     ball.tick(mouseup)
     text.tick()
+    Render.world(render)
+    requestAnimationFrame(() => this.tick())
+  }
+
+  updateEngine() {
+    const {
+      engine,
+      lastTick = Date.now()
+    } = this
+    const thisTick = Date.now()
+    const delta = thisTick - lastTick
+    this.lastTick = thisTick
+    Engine.update(engine, delta)
   }
 }
 
