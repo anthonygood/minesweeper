@@ -39,7 +39,7 @@ class GameController {
     addWalls(CANVAS_WIDTH, CANVAS_HEIGHT, world)
     Events.on(engine, 'afterUpdate', () => this.tick())
 
-    this.text.render({ lines: ['I am foo lord', 'I am king', 'I am gest', 'lol'], x: 50, y: 150, size: 24, lineheight: 36 })
+    this.text.start({ lines: ['u ok hun??'], x: 50, y: 50, size: 24, lineheight: 36 })
   }
 
   tick() {

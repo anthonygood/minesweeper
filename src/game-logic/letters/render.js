@@ -30,7 +30,7 @@ export const renderLetter = async (body, context) => {
   // and use the physics model's bounds (which aren't as neatly aligned for prose).
   withContext(context, ctx => {
     // NB. any movement while sleeping won't be rendered
-    if (body.isSleeping) return path.draw(ctx)
+    // if (body.isSleeping) return path.draw(ctx)
 
     ctx.translate(x, y)
     ctx.rotate(angle)

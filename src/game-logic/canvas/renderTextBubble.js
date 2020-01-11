@@ -56,7 +56,7 @@ export const messageBubble = (
 </svg>
 `
 
-export const renderBubble = (ctx, bounds) => {
+export const renderBubble = (ctx, bounds, beforeRender = () => {}) => {
   const { height, width } = getBubbleSizeForTextBounds(bounds)
   const { x, y } = getBubbleOriginForTextBounds(bounds)
 
@@ -64,6 +64,9 @@ export const renderBubble = (ctx, bounds) => {
   const encodedBubble = encodeURIComponent(bubble)
 
   const img = new Image()
-  img.onload = () => ctx.drawImage(img, x, y)
+  img.onload = () => {
+    beforeRender()
+    ctx.drawImage(img, x, y)
+  }
   img.src = `data:image/svg+xml,${encodedBubble}`
 }
