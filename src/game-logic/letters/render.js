@@ -1,4 +1,4 @@
-import { getFont } from './getTextPaths'
+import { gameFontSync } from './getTextPaths'
 import { DEFAULT_TEXT_SIZE } from '../canvas/sizes'
 import withContext from '../../util/withContext'
 
@@ -7,54 +7,48 @@ const getWidthHeight = ({ min, max }) => ({
   height: max.y - min.y
 })
 
-const getOrigin = ({ min, max }) => {
-  const { width, height } = getWidthHeight({ min, max })
-
-  return {
-    x: width / 2,
-    y: height / 2
-  }
-}
+let count = 0
 
 export const renderLetter = async (body, context) => {
   const {
+    bounds: { min, max },
     angle,
+    position: { x, y },
     plugin: {
       char,
-      // boundingBox,
+      path,
       size = DEFAULT_TEXT_SIZE
     }
   } = body
 
   if (!char) return
 
-  const { min, max } = body.bounds
-
+  count++
   // Bit of a hack:
   // If the text is sleeping, assume it's in initialised position
   // and draw from text bounding box. Otherwise, assume it's in motion
   // and use the physics model's bounds (which aren't as neatly aligned for prose).
-  // const x = body.isSleeping ? boundingBox.x1 : min.x
-  // const y = body.isSleeping ? boundingBox.y2 : max.y
-  // const xyBounds = { x: (boundingBox.x2 - boundingBox.x1) / 2, y: (boundingBox.y2 - boundingBox.y1) / 2 }
-  const { x, y } = getOrigin({ min, max })
+  // const { x, y } = getOrigin({ min, max })
   const { width, height } = getWidthHeight({ min, max })
-
-  const font = await getFont()
+  const xx = width / 2
+  const yy = height / 2
+  console.assert(count > 1, x, y, min.x+xx, min.y+yy)
 
   withContext(context, ctx => {
-    ctx.translate(
-      min.x + x,
-      min.y + y
-    )
+    // if (body.isSleeping) return path.draw(ctx)
+    ctx.translate(x, y)
     ctx.rotate(angle)
-    font.draw(
+    ctx.translate(-x, -y)
+    gameFontSync.draw(
       context,
       char,
-      0 - width / 2,
-      0 + height / 2,
+      min.x,
+      max.y,
       size
     )
+    // ctx.strokeRect(min.x, min.y, width, height)
+    // ctx.strokeRect(0 - x, 0 - y, width, height)
+    // ctx.strokeRect(x, y, 2, 2)
   })
 }
 
