@@ -1,21 +1,21 @@
-import { World } from 'matter-js'
+import { World, Body } from 'matter-js'
 import { getFont } from './letters/getTextPaths'
 import getText from './letters/getText'
 import { renderBubble } from './canvas/renderTextBubble'
-import { DEFAULT_TEXT_SIZE, DEFAULT_LINE_HEIGHT } from './canvas/sizes'
+import { DEFAULT_TEXT_SIZE, DEFAULT_LINE_HEIGHT, CANVAS_WIDTH } from './canvas/sizes'
 
 export const getOuterBounds = bounds => bounds.reduce(
   (acc, item) => {
     const { min: minA, max: maxA } = acc
     const { min: minB, max: maxB } = Array.isArray(item) ? getOuterBounds(item) : item
     return {
-      min: { x: Math.min(minA.x, minB.x), y: Math.min(minA.y, minB.y) },
-      max: { x: Math.max(maxA.x, maxB.x), y: Math.max(maxA.y, maxB.y) },
+      min: { x: 40, y: Math.min(minA.y, minB.y) },
+      max: { x: CANVAS_WIDTH - 50, y: Math.max(maxA.y, maxB.y) },
     }
   },
   {
     min: { x: Infinity, y: Infinity },
-    max: { x: 0, y: 0 }
+    max: { x: -Infinity, y: -Infinity }
   }
 )
 
@@ -34,7 +34,10 @@ class TextController {
   }
 
   tick() {
-    if (!this.text) return
+    this.bodies.forEach(_body => {
+      // TODO
+      // Body.rotate(body, 0.005)
+    })
   }
 
   // Text itself is rendered via homebrew matterjs plugin,

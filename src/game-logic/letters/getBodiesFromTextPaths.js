@@ -23,6 +23,7 @@ const getBodyFromTextPath = path => {
     // angle: 1,
     isSleeping: true,
     restitution: 0.2,
+    density: 0.2,
     plugin: {
       render: renderLetter,
       char: path.char,

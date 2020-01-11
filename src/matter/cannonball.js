@@ -8,7 +8,7 @@ const cannonball = (x, y) => {
     y,
     RADIUS,
     {
-      density: 0.9,
+      density: 0.1,
       friction: 0.01,
       frictionAir: 0.0001,
       restitution: 0.8,

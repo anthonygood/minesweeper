@@ -2,10 +2,11 @@ import { Constraint, Vector, World } from 'matter-js'
 import { cannonball } from '../matter'
 
 class BallController {
-  constructor(world, originX, originY) {
+  constructor(world, originX, originY, intervalBetweenBalls) {
     this.world = world
     this.x = originX
     this.y = originY
+    this.interval = intervalBetweenBalls
     this.newBall()
   }
 
@@ -47,6 +48,13 @@ class BallController {
     const { constraint, world } = this
     World.remove(world, constraint)
     delete this.constraint
+  }
+
+  tick(mouseup) {
+    if (mouseup && this.readyToSling()) {
+      this.sling()
+      setTimeout(() => this.newBall(), this.interval)
+    }
   }
 }
 
