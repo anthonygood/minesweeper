@@ -12,14 +12,15 @@ export const getFont = () => gameFont = gameFont || new Promise((resolve, reject
   })
 })
 
-const annotateWithLetter = string => (path, i) => {
+const annotateWithLetterAndSize = (string, size) => (path, i) => {
   path.char = string[i]
+  path.size = size
   return path
 }
 
 const getFontPaths = (font, string, size, x, y) =>
   font.getPaths(string, x, y, size)
-    .map(annotateWithLetter(string))
+    .map(annotateWithLetterAndSize(string, size))
 
 export const lineSync = (string, size, x, y) => {
   if (!gameFontSync) throw new Error('Cannot call lineSync without loading game font first.')

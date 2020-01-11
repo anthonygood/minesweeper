@@ -23,7 +23,7 @@ class GameController {
 
     const ballOriginX = CANVAS_WIDTH - percentX(50)
     const ballOriginY = CANVAS_HEIGHT - percentY(15)
-    this.ball = new BallController(world, ballOriginX, ballOriginY)
+    this.ball = new BallController(world, ballOriginX, ballOriginY, NEW_BALL_DELAY)
     this.text = new TextController(world, bkgCanvas)
   }
 
@@ -39,15 +39,14 @@ class GameController {
     addWalls(CANVAS_WIDTH, CANVAS_HEIGHT, world)
     Events.on(engine, 'afterUpdate', () => this.tick())
 
-    this.text.render({ lines: ['huh?', 'I know right'], x: 25, y: 150 })
+    this.text.render({ lines: ['I am foo lord', ' ', 'lol'], x: 50, y: 250, size: 36, lineheight: 36 })
   }
 
   tick() {
-    const { ball, mouseConstraint } = this
-    if (mouseConstraint.mouse.button === -1 && ball.readyToSling()) {
-      ball.sling()
-      setTimeout(() => ball.newBall(), NEW_BALL_DELAY)
-    }
+    const { ball, mouseConstraint, text } = this
+    const mouseup = mouseConstraint.mouse.button === -1
+    ball.tick(mouseup)
+    text.tick()
   }
 }
 
