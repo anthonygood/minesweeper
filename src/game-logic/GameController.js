@@ -1,22 +1,25 @@
-import { Engine, Render } from 'matter-js'
+import { Composite, Engine, Render } from 'matter-js'
 import decomp from 'poly-decomp'
-import {
-  addMouseInteractivity,
-  addWalls,
-  setup
-} from '../matter'
-import { percentX, percentY } from '../util/percentXY'
+import { addWalls, setup } from '../matter'
 import { CANVAS_WIDTH, CANVAS_HEIGHT } from './canvas/sizes'
-import BallController from './BallController'
-import TextController from './TextController'
+import ParticleController from './ParticleController'
 
-const NEW_BALL_DELAY = 3000
+const applyGravityWithScale = (scale = 0.001) => body => {
+  const {
+    isStatic,
+    isSleeping,
+    plugin: { gravity: bodyOptions = {} }
+  } = body
 
-const messages = [
-  ['u ok hun??', 'lolololol jk'],
-  ['wtf no way thatsnot true'],
-  ['wtf srsly m88 ... wtf lol????'],
-]
+  const { scale: bodyGravityScale = 1 } = bodyOptions
+
+  if (isStatic || isSleeping) return
+
+  body.force.y += body.mass * (scale * bodyGravityScale)
+}
+
+const scaleGravity = (world, scale) => () =>
+  Composite.allBodies(world).forEach(applyGravityWithScale(scale))
 
 class GameController {
   constructor(canvas, bkgCanvas) {
@@ -29,45 +32,32 @@ class GameController {
     this.render = render
     this.world = world
 
-    const ballOriginX = CANVAS_WIDTH - percentX(50)
-    const ballOriginY = CANVAS_HEIGHT - percentY(15)
-    this.ball = new BallController(world, ballOriginX, ballOriginY, NEW_BALL_DELAY)
-    this.text = new TextController(world, bkgCanvas, messages)
+    this.particles = new ParticleController(world, canvas, bkgCanvas)
     this.paused = false
     window.controller = this
   }
 
-  async load() {
-    await this.text.load()
-  }
-
   async start() {
-    await this.load()
-
-    const { canvas, engine, world } = this
-    this.mouseConstraint = addMouseInteractivity(canvas, engine, world)
+    const { canvas, world } = this
     addWalls(CANVAS_WIDTH, CANVAS_HEIGHT, world)
 
     document.addEventListener('keydown', event => this.onKeyDown(event))
+    canvas.addEventListener('mousemove', event => this.onMouseMove(event))
 
     this.tick()
   }
 
   tick() {
     const {
-      ball,
-      mouseConstraint,
       paused,
       render,
-      text
+      particles
     } = this
 
     if (!paused) {
       this.updateEngine()
 
-      const mouseup = mouseConstraint.mouse.button === -1
-      ball.tick(mouseup)
-      text.tick()
+      particles.tick()
 
       Render.world(render)
     }
@@ -81,13 +71,19 @@ class GameController {
       lastTick = Date.now()
     } = this
     const thisTick = Date.now()
-    const delta = thisTick - lastTick
+    const delta = Math.min(thisTick - lastTick, 1000)
     this.lastTick = thisTick
     Engine.update(engine, delta)
   }
 
   onKeyDown({ code }) {
     return code === 'Space' && this.togglePause()
+  }
+
+  onMouseMove({ x, y }) {
+    if (!this.paused) {
+      this.particles.add(x, y)
+    }
   }
 
   togglePause() {
