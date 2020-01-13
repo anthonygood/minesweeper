@@ -53,7 +53,7 @@ class TextController {
 
   // Text itself is rendered via homebrew matterjs plugin,
   // Text bubble is rendered onto (background) canvas once separately.
-  nextMessage({ x = 50, y = 125, size = DEFAULT_TEXT_SIZE, lineheight = DEFAULT_LINE_HEIGHT } = {}) {
+  nextMessage({ x = 50, y = 50, size = DEFAULT_TEXT_SIZE, lineheight = DEFAULT_LINE_HEIGHT } = {}) {
     const { canvas, world } = this
     this.currentMessage = this.messages.pop()
 

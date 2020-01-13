@@ -25,8 +25,6 @@ export const renderLetter = async (body, context) => {
   if (!char) return
   const { min, max } = unrotatedBounds(body)
 
-  renderRegions(body, context)
-
   // Bit of a hack:
   // If the text is sleeping, assume it's in initialised position
   // and draw from text bounding box. Otherwise, assume it's in motion

@@ -24,6 +24,7 @@ class GameController {
     window.decomp = decomp // Needed by matter.js
     const { engine, render, world } = setup(canvas)
 
+    this.canvas = canvas
     this.engine = engine
     this.render = render
     this.world = world
@@ -32,8 +33,8 @@ class GameController {
     const ballOriginY = CANVAS_HEIGHT - percentY(15)
     this.ball = new BallController(world, ballOriginX, ballOriginY, NEW_BALL_DELAY)
     this.text = new TextController(world, bkgCanvas, messages)
-    this.lastTick = null
     this.paused = false
+    window.controller = this
   }
 
   async load() {
@@ -47,7 +48,7 @@ class GameController {
     this.mouseConstraint = addMouseInteractivity(canvas, engine, world)
     addWalls(CANVAS_WIDTH, CANVAS_HEIGHT, world)
 
-    document.addEventListener('keydown', ({ code }) => code === 'Space' && this.togglePause())
+    document.addEventListener('keydown', event => this.onKeyDown(event))
 
     this.tick()
   }
@@ -61,15 +62,17 @@ class GameController {
       text
     } = this
 
+    if (!paused) {
+      this.updateEngine()
+
+      const mouseup = mouseConstraint.mouse.button === -1
+      ball.tick(mouseup)
+      text.tick()
+
+      Render.world(render)
+    }
+
     requestAnimationFrame(() => this.tick())
-    if (paused) return
-
-    this.updateEngine()
-
-    const mouseup = mouseConstraint.mouse.button === -1
-    ball.tick(mouseup)
-    text.tick()
-    Render.world(render)
   }
 
   updateEngine() {
