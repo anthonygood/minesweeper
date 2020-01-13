@@ -2,17 +2,17 @@ import { Bodies } from 'matter-js'
 
 const RADIUS = 12
 
-const cannonball = (x, y) => {
+const cannonball = (x, y, isSleeping = false) => {
   return Bodies.circle(
     x,
     y,
     RADIUS,
     {
-      density: 0.1,
+      density: 1,
       friction: 0.01,
       frictionAir: 0.0001,
       restitution: 0.8,
-      isSleeping: true,
+      isSleeping: false,
       render: {
         sprite: {
           texture: 'rofl.png',

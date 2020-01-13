@@ -1,4 +1,4 @@
-import { World, Body } from 'matter-js'
+import { World, Body, Composite } from 'matter-js'
 import { getFont } from './letters/getTextPaths'
 import getText from './letters/getText'
 import { renderBubble } from './canvas/renderTextBubble'
@@ -10,7 +10,7 @@ import {
 } from './canvas/sizes'
 
 // NB frame-rate bound?
-const crawl = body => Body.translate(body, { x: 0, y: 2 })
+const crawl = body => Body.translate(body, { x: 0, y: 1 })
 
 export const getOuterBounds = bounds => bounds.reduce(
   (acc, item) => {
@@ -44,7 +44,8 @@ class TextController {
 
   tick() {
     const { canvas } = this
-    const { min } = this.getSleepingBodyBounds()
+    const { min } = this.getTextBounds()
+
     const crawledBottom = min.y > canvas.height
     if (!this.currentMessage || crawledBottom) return this.nextMessage()
     this.crawl()
@@ -70,33 +71,34 @@ class TextController {
 
     renderBubble(
       canvas.getContext('2d'),
-      this.getSleepingBodyBounds()
+      this.getTextBounds()
     )
 
     return true
   }
 
   crawl() {
-    this.getSleepingBodies().forEach(crawl)
+    const { canvas, world } = this
+    this.bodies.forEach(crawl)
 
-    const { canvas } = this
+    // ensure broadphase regions are updated despite text being asleep
+    Composite.setModified(world, true)
+
     const ctx = canvas.getContext('2d')
 
     renderBubble(
       ctx,
-      this.getSleepingBodyBounds(),
+      this.getTextBounds(),
       () => ctx.clearRect(0, 0, canvas.width, canvas.height)
     )
   }
 
-  getSleepingBodyBounds() {
+  getTextBounds() {
     return getOuterBounds(
-      this.getSleepingBodies().map(_ => _.bounds)
+      this.bodies
+        .filter(_ => _.isSleeping)
+        .map(_ => _.bounds)
     )
-  }
-
-  getSleepingBodies() {
-    return this.bodies.filter(_ => _.isSleeping)
   }
 }
 

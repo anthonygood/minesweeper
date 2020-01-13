@@ -1,7 +1,8 @@
 import { Body } from 'matter-js'
 import { gameFontSync } from './getTextPaths'
 import { DEFAULT_TEXT_SIZE } from '../canvas/sizes'
-import withContext from '../../util/withContext'
+import withContext from '../canvas/withContext'
+import renderRegions from '../canvas/renderRegions'
 
 const unrotatedBounds = (body) => {
   const { angle, vertices, position } = body
@@ -23,6 +24,8 @@ export const renderLetter = async (body, context) => {
 
   if (!char) return
   const { min, max } = unrotatedBounds(body)
+
+  renderRegions(body, context)
 
   // Bit of a hack:
   // If the text is sleeping, assume it's in initialised position
