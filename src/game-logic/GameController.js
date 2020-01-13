@@ -2,6 +2,7 @@ import { Composite, Engine, Render } from 'matter-js'
 import decomp from 'poly-decomp'
 import { addWalls, setup } from '../matter'
 import { CANVAS_WIDTH, CANVAS_HEIGHT } from './canvas/sizes'
+import BackgroundController from './BackgroundController'
 import ParticleController from './ParticleController'
 
 const applyGravityWithScale = (scale = 0.001) => body => {
@@ -28,10 +29,12 @@ class GameController {
     const { engine, render, world } = setup(canvas)
 
     this.canvas = canvas
+    this.bkgCanvas = bkgCanvas
     this.engine = engine
     this.render = render
     this.world = world
 
+    this.background = new BackgroundController(bkgCanvas, 0, 255, 231)
     this.particles = new ParticleController(world, canvas, bkgCanvas)
     this.paused = false
     window.controller = this
@@ -51,12 +54,14 @@ class GameController {
     const {
       paused,
       render,
+      background,
       particles
     } = this
 
     if (!paused) {
       this.updateEngine()
 
+      background.tick()
       particles.tick()
 
       Render.world(render)

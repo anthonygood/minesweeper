@@ -1,16 +1,8 @@
 import { Bodies, World } from 'matter-js'
 import renderRegions from './canvas/renderRegions'
+import between from '../util/between'
 
 const RADIUS = 5
-
-const sample = arr =>
-  arr[Math.floor(Math.random() * arr.length)]
-
-const between = (x, y) => {
-  const upper = y - x + 1
-  const rand = x + Math.random() * upper
-  return Math.floor(rand)
-}
 
 const outOfBounds = (height, width, body) => {
   const { bounds: { min, max } } = body
