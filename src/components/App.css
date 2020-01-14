@@ -1,54 +1,14 @@
-.App {
-  /* text-align: center; */
+#main-canvas {
+  height: 100vh;
+  width: 100vw;
 }
 
 #bkg-canvas {
+  height: 100vh;
+  width: 100vw;
   background-color: rgb(0, 255, 231);
 }
 
-.App-logo {
-  animation: App-logo-spin infinite 20s linear;
-  height: 80px;
-}
-
-.App-header {
-  background-color: #222;
-  height: 150px;
-  padding: 20px;
-  color: white;
-}
-
-.App-title {
-  font-size: 1.5em;
-}
-
-.App-intro {
-  font-size: large;
-}
-
-.MessageBubble {
-  margin: 20px;
-  padding: 10px;
-  background-color: rgb(151, 255, 232);
-  border: 3px dotted rgb(101, 221, 195);
-  border-radius: 25px;
-  position: relative;
-}
-
-.MessageBubble::after {
-  content: '';
-  height: 20px;
-  width: 20px;
-  position: absolute;
-  bottom: -13px;
-  background-color: rgb(151, 255, 232);
-  border: 3px dotted rgb(101, 221, 195);
-  border-top: none;
-  border-left: none;
-  transform: rotate(45deg);
-}
-
-@keyframes App-logo-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+.App {
+  height: 100vh;
 }

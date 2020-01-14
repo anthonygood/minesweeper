@@ -10,10 +10,10 @@ import { CANVAS_HEIGHT, CANVAS_WIDTH } from '../game-logic/canvas/sizes'
 const setupMatterJs = canvas => {
   const ctx = canvas.getContext('2d')
   const world = World.create({
-    // gravity: { scale: 0 }
+    // gravity: { scale: 0.0001 }
   })
   const engine = Engine.create({
-    timing: { timeScale: 0.75 },
+    timing: { timeScale: 0.4 },
     enableSleeping: true,
     world,
   })

@@ -26,12 +26,11 @@ class GameController {
   constructor(canvas, bkgCanvas) {
     // Set up matter's built-in renderer
     window.decomp = decomp // Needed by matter.js
-    const { engine, render, world } = setup(canvas)
+    const { engine, world } = setup(canvas)
 
     this.canvas = canvas
     this.bkgCanvas = bkgCanvas
     this.engine = engine
-    this.render = render
     this.world = world
 
     this.background = new BackgroundController(bkgCanvas, 0, 255, 231)
@@ -53,7 +52,7 @@ class GameController {
   tick() {
     const {
       paused,
-      render,
+      canvas,
       background,
       particles
     } = this
@@ -64,8 +63,15 @@ class GameController {
       background.tick()
       particles.tick()
 
-      Render.world(render)
+      this.render()
+
+      // Render.world(render)
     }
+
+    // setTimeout(
+    //   () => this.tick(),
+    //   1000 / 12
+    // )
 
     requestAnimationFrame(() => this.tick())
   }
@@ -79,6 +85,15 @@ class GameController {
     const delta = Math.min(thisTick - lastTick, 1000)
     this.lastTick = thisTick
     Engine.update(engine, delta)
+  }
+
+  render() {
+    const { canvas, background, particles } = this
+    const ctx = canvas.getContext('2d')
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+    background.render()
+    particles.render()
   }
 
   onKeyDown({ code }) {

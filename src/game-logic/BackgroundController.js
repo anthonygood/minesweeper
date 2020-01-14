@@ -14,15 +14,15 @@ class BackgroundController {
   }
 
   tick() {
-    const { red, green, blue } = this.update()
-    this.canvas.style.backgroundColor = rgb(red, green, blue)
-  }
-
-  update() {
     this.red = upDown(this.red)
     this.green = upDown(this.green)
     this.blue = upDown(this.blue)
     return this
+  }
+
+  render() {
+    const { canvas, red, green, blue } = this
+    canvas.style.backgroundColor = rgb(red, green, blue)
   }
 }
 

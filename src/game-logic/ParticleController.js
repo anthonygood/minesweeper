@@ -1,6 +1,6 @@
 import { Bodies, World } from 'matter-js'
-import renderRegions from './canvas/renderRegions'
 import between from '../util/between'
+import ParticleRenderer from './ParticleRenderer'
 
 const RADIUS = 5
 
@@ -14,7 +14,7 @@ const outOfBounds = (height, width, body) => {
 const nTimes = n => ({ do: fn => Array.from({ length: n }).forEach(fn) })
 
 class ParticleController {
-  constructor(world, canvas, bkgCanvas, { count = 150 } = {}) {
+  constructor(world, canvas, bkgCanvas, { count = 100 } = {}) {
     this.world = world
 
     // Assumes background canvas is same height/width
@@ -28,9 +28,15 @@ class ParticleController {
   }
 
   tick() {
-    const { count, particles } = this
     this.gc()
-    if (particles.length < count) this.add()
+    this.spawn()
+    this.particles.forEach(particle => particle.mutate())
+  }
+
+  render() {
+    const { canvas, particles } = this
+    const context = canvas.getContext('2d')
+    particles.forEach(particle => particle.render(context))
   }
 
   gc() {
@@ -41,7 +47,7 @@ class ParticleController {
       world
     } = this
 
-    this.particles = particles.filter((particle) => {
+    this.particles = particles.filter(({ particle }) => {
       if (outOfBounds(height, width, particle)) {
         World.remove(world, particle)
         return false
@@ -51,27 +57,8 @@ class ParticleController {
   }
 
   spawn() {
-    const {
-      count,
-      world,
-      width,
-      height
-    } = this
-
-    this.particles.forEach(particle => {
-      World.remove(world, particle)
-    })
-    this.particles = []
-
-    nTimes(count).do(() => {
-      const particle = this.particle(
-        between(0, width),
-        between(0, height)
-      )
-
-      this.particles.push(particle)
-      World.add(world, particle)
-    })
+    const { count, particles } = this
+    nTimes(count - particles.length).do(() => this.add())
   }
 
   add(
@@ -81,7 +68,8 @@ class ParticleController {
   ) {
     const { particles, world } = this
     const particle = this.particle(x, y, radius)
-    particles.push(particle)
+    const renderer = new ParticleRenderer(particle)
+    particles.push(renderer)
     World.add(world, particle)
   }
 
@@ -99,7 +87,7 @@ class ParticleController {
           visible: false,
         },
         plugin: {
-          render: renderRegions
+          // render: renderRegions
         }
       }
     )

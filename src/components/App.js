@@ -7,10 +7,8 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        <div id="canvas-container">
-          <canvas id="main-canvas" height={CANVAS_HEIGHT} width={CANVAS_WIDTH}></canvas>
-          <canvas id="bkg-canvas" height={CANVAS_HEIGHT} width={CANVAS_WIDTH} style={{ position: 'absolute', top: 0, left: 0, zIndex: -1 }}></canvas>
-        </div>
+        <canvas id="main-canvas" height={CANVAS_HEIGHT} width={CANVAS_WIDTH}></canvas>
+        <canvas id="bkg-canvas" height={CANVAS_HEIGHT} width={CANVAS_WIDTH} style={{ position: 'absolute', top: 0, left: 0, zIndex: -1 }}></canvas>
       </div>
     )
   }
