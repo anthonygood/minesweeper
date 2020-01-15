@@ -7,7 +7,7 @@ import sample from '../util/sample'
 const BUCKET_SIZE = 48
 const REGION_COLOUR = 'rgba(255,255,255,0.25)'
 
-const randomSize = () => between(32, 88)
+const randomSize = () => between(48, 56)
 const randomOpacity = () => between(0, 3) / 10
 
 const getColour = (opacity = randomOpacity()) =>
@@ -55,10 +55,11 @@ class ParticleRenderer {
       const draw = sample('fillRect', 'strokeRect')
 
       ctx.fillRect(
-        BUCKET_SIZE * startCol,
-        BUCKET_SIZE * startRow,
-        BUCKET_SIZE + BUCKET_SIZE * (endCol - startCol),
-        BUCKET_SIZE + BUCKET_SIZE * (endRow - startRow)
+        (BUCKET_SIZE * startCol) - (BUCKET_SIZE - size),
+        (BUCKET_SIZE * startRow) - (BUCKET_SIZE - size),
+        size, size
+        // BUCKET_SIZE + BUCKET_SIZE * (endCol - startCol),
+        // BUCKET_SIZE + BUCKET_SIZE * (endRow - startRow)
         // body.bounds.min.x, body.bounds.min.y,
         // size, size
       )
