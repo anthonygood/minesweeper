@@ -86,9 +86,6 @@ class ParticleController {
         render: {
           visible: false,
         },
-        plugin: {
-          // render: renderRegions
-        }
       }
     )
   }

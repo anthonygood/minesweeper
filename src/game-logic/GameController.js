@@ -4,6 +4,7 @@ import { addWalls, setup } from '../matter'
 import { CANVAS_WIDTH, CANVAS_HEIGHT } from './canvas/sizes'
 import BackgroundController from './BackgroundController'
 import ParticleController from './ParticleController'
+import SoundController from './SoundController'
 
 const applyGravityWithScale = (scale = 0.001) => body => {
   const {
@@ -33,7 +34,7 @@ class GameController {
     this.engine = engine
     this.world = world
 
-    this.background = new BackgroundController(bkgCanvas, 0, 255, 231)
+    this.background = new BackgroundController(bkgCanvas, 0,0,0, 255, 231)
     this.particles = new ParticleController(world, canvas, bkgCanvas)
     this.paused = false
     window.controller = this
@@ -44,7 +45,10 @@ class GameController {
     addWalls(CANVAS_WIDTH, CANVAS_HEIGHT, world)
 
     document.addEventListener('keydown', event => this.onKeyDown(event))
+    canvas.addEventListener('mouseenter', event => this.onMouseEnter(event))
     canvas.addEventListener('mousemove', event => this.onMouseMove(event))
+    canvas.addEventListener('mouseleave', event => this.onMouseLeave(event))
+
 
     this.tick()
   }
@@ -103,11 +107,24 @@ class GameController {
   onMouseMove({ x, y }) {
     if (!this.paused) {
       this.particles.add(x, y)
+      this.sound.tune(x, y)
     }
+  }
+
+  onMouseEnter({ x, y }) {
+    if (!this.paused) {
+      this.sound = this.sound || new SoundController()
+      this.sound.play(x, y)
+    }
+  }
+
+  onMouseLeave() {
+    this.sound.stop()
   }
 
   togglePause() {
     this.paused = !this.paused
+    this.sound.stop()
     this.lastTick = Date.now()
   }
 }
