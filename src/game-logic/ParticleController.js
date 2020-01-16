@@ -29,7 +29,7 @@ class ParticleController {
 
   tick() {
     this.gc()
-    this.spawn()
+    // this.spawn()
     this.particles.forEach(particle => particle.mutate())
   }
 

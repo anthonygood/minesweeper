@@ -24,39 +24,49 @@ const scaleGravity = (world, scale) => () =>
   Composite.allBodies(world).forEach(applyGravityWithScale(scale))
 
 class GameController {
-  constructor(canvas, bkgCanvas) {
+  constructor() {
     // Set up matter's built-in renderer
     window.decomp = decomp // Needed by matter.js
-    const { engine, world } = setup(canvas)
+    window.controller = this
+    this.paused = false
+    this.sound = new SoundController()
+  }
 
+  async start(canvas, bkgCanvas) {
+    const { engine, world } = setup(canvas)
     this.canvas = canvas
     this.bkgCanvas = bkgCanvas
     this.engine = engine
     this.world = world
-
     this.background = new BackgroundController(bkgCanvas, 0,0,0, 255, 231)
     this.particles = new ParticleController(world, canvas, bkgCanvas)
-    this.paused = false
-    window.controller = this
+
+    addWalls(CANVAS_WIDTH, CANVAS_HEIGHT, world)
+    this.registerEvents()
+    this.tick()
+    return this
   }
 
-  async start() {
-    const { canvas, world } = this
-    addWalls(CANVAS_WIDTH, CANVAS_HEIGHT, world)
+  registerEvents() {
+    const { canvas } = this
 
+    // Keyboard events
     document.addEventListener('keydown', event => this.onKeyDown(event))
+
+    // Mouse events
     canvas.addEventListener('mouseenter', event => this.onMouseEnter(event))
     canvas.addEventListener('mousemove', event => this.onMouseMove(event))
     canvas.addEventListener('mouseleave', event => this.onMouseLeave(event))
 
-
-    this.tick()
+    // Touch events
+    canvas.addEventListener('touchstart', event => this.onMouseEnter(event))
+    canvas.addEventListener('touchmove', event => this.onMouseMove(event))
+    canvas.addEventListener('touchend', event => this.onMouseLeave(event))
   }
 
   tick() {
     const {
       paused,
-      canvas,
       background,
       particles
     } = this
@@ -68,8 +78,6 @@ class GameController {
       particles.tick()
 
       this.render()
-
-      // Render.world(render)
     }
 
     // setTimeout(
@@ -104,18 +112,24 @@ class GameController {
     return code === 'Space' && this.togglePause()
   }
 
-  onMouseMove({ x, y }) {
-    if (!this.paused) {
-      this.particles.add(x, y)
-      this.sound.tune(x, y)
-    }
+  ifNotPaused(event, fn) {
+    event.preventDefault()
+    if (!this.paused) fn(event)
   }
 
-  onMouseEnter({ x, y }) {
-    if (!this.paused) {
-      this.sound = this.sound || new SoundController()
+  onMouseMove(event) {
+    this.ifNotPaused(event, () => {
+      const { x, y } = event
+      this.particles.add(x, y)
+      this.sound.tune(x, y)
+    })
+  }
+
+  onMouseEnter(event) {
+    this.ifNotPaused(event, () => {
+      const { x, y } = event
       this.sound.play(x, y)
-    }
+    })
   }
 
   onMouseLeave() {
