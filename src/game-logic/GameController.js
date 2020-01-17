@@ -5,6 +5,7 @@ import { CANVAS_WIDTH, CANVAS_HEIGHT } from './canvas/sizes'
 import BackgroundController from './BackgroundController'
 import ParticleController from './ParticleController'
 import SoundController from './SoundController'
+import SeedController from './SeedController'
 
 const applyGravityWithScale = (scale = 0.001) => body => {
   const {
@@ -40,6 +41,7 @@ class GameController {
     this.world = world
     this.background = new BackgroundController(bkgCanvas, 0,0,0, 255, 231)
     this.particles = new ParticleController(world, canvas, bkgCanvas)
+    this.seeds = new SeedController(canvas)
 
     addWalls(CANVAS_WIDTH, CANVAS_HEIGHT, world)
     this.registerEvents()
@@ -54,6 +56,7 @@ class GameController {
     document.addEventListener('keydown', event => this.onKeyDown(event))
 
     // Mouse events
+    canvas.addEventListener('click', event => this.onClick(event))
     canvas.addEventListener('mouseenter', event => this.onMouseEnter(event))
     canvas.addEventListener('mousemove', event => this.onMouseMove(event))
     canvas.addEventListener('mouseleave', event => this.onMouseLeave(event))
@@ -68,7 +71,8 @@ class GameController {
     const {
       paused,
       background,
-      particles
+      particles,
+      seeds
     } = this
 
     if (!paused) {
@@ -76,16 +80,17 @@ class GameController {
 
       background.tick()
       particles.tick()
+      seeds.tick()
 
       this.render()
     }
 
-    // setTimeout(
-    //   () => this.tick(),
-    //   1000 / 12
-    // )
+    setTimeout(
+      () => this.tick(),
+      1000 / 12
+    )
 
-    requestAnimationFrame(() => this.tick())
+    // requestAnimationFrame(() => this.tick())
   }
 
   updateEngine() {
@@ -100,16 +105,24 @@ class GameController {
   }
 
   render() {
-    const { canvas, background, particles } = this
+    const { canvas, background, seeds, particles } = this
     const ctx = canvas.getContext('2d')
     ctx.clearRect(0, 0, canvas.width, canvas.height)
 
     background.render()
     particles.render()
+    seeds.render()
   }
 
   onKeyDown({ code }) {
+    if (code === 'Enter') this.seeds.start()
+    if (code === 'KeyQ')  this.seeds.random()
     return code === 'Space' && this.togglePause()
+  }
+
+  onClick(e) {
+    const { x, y } = e
+    this.seeds.toggle(x, y)
   }
 
   ifNotPaused(event, fn) {
@@ -120,7 +133,6 @@ class GameController {
   onMouseMove(event) {
     this.ifNotPaused(event, () => {
       const { x, y } = event
-      this.particles.add(x, y)
       this.sound.tune(x, y)
     })
   }

@@ -1,26 +1,15 @@
 import withContext from '../game-logic/canvas/withContext'
-import between from '../util/between'
 import upDown from '../util/upDown'
 import sample from '../util/sample'
+import {
+  getColour,
+  newOpacity,
+  randomSize,
+  randomOpacity
+} from './canvas/shimmery'
 
 // NB. this is the engine default but can be changed.
 const BUCKET_SIZE = 48
-const REGION_COLOUR = 'rgba(255,255,255,0.25)'
-
-const randomSize = () => between(48, 56)
-const randomOpacity = () => between(0, 1) / 10
-
-const getColour = (opacity = randomOpacity()) =>
-  `rgba(255,255,255,${opacity})`
-
-const newOpacity = opacity => {
-  const val = upDown(opacity * 100) / 100
-
-  return Math.min(
-    Math.max(val, 0.025),
-    0.3
-  )
-}
 
 const growOrShrink = size => upDown(size)
 
@@ -33,7 +22,10 @@ class ParticleRenderer {
   }
 
   mutate(_delta) {
-    this.opacity = newOpacity(this.opacity)
+    this.opacity = Math.max(
+      Math.min(0.1, newOpacity(this.opacity)),
+      0.025
+    )
     this.size = growOrShrink(this.size)
     return this
   }
@@ -44,9 +36,7 @@ class ParticleRenderer {
 
     const {
       startCol,
-      endCol,
       startRow,
-      endRow
     } = particle.region
 
     const offset = size - BUCKET_SIZE

@@ -14,7 +14,7 @@ const outOfBounds = (height, width, body) => {
 const nTimes = n => ({ do: fn => Array.from({ length: n }).forEach(fn) })
 
 class ParticleController {
-  constructor(world, canvas, bkgCanvas, { count = 50 } = {}) {
+  constructor(world, canvas, bkgCanvas, { count = 200 } = {}) {
     this.world = world
 
     // Assumes background canvas is same height/width
@@ -29,7 +29,7 @@ class ParticleController {
 
   tick() {
     this.gc()
-    // this.spawn()
+    this.spawn()
     this.particles.forEach(particle => particle.mutate())
   }
 
