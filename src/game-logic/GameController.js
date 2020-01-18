@@ -40,12 +40,15 @@ class GameController {
     this.engine = engine
     this.world = world
     this.background = new BackgroundController(bkgCanvas, 0,0,0, 255, 231)
+    // this.background = new BackgroundController(bkgCanvas, 255, 255, 231)
+
     this.particles = new ParticleController(world, canvas, bkgCanvas)
-    this.seeds = new SeedController(canvas)
+    this.seeds = new SeedController(canvas, 32)
 
     addWalls(CANVAS_WIDTH, CANVAS_HEIGHT, world)
     this.registerEvents()
     this.tick()
+
     return this
   }
 
@@ -72,7 +75,8 @@ class GameController {
       paused,
       background,
       particles,
-      seeds
+      seeds,
+      mouse
     } = this
 
     if (!paused) {
@@ -85,12 +89,12 @@ class GameController {
       this.render()
     }
 
-    setTimeout(
-      () => this.tick(),
-      1000 / 12
-    )
+    // setTimeout(
+    //   () => this.tick(),
+    //   1000 / 12
+    // )
 
-    // requestAnimationFrame(() => this.tick())
+    requestAnimationFrame(() => this.tick())
   }
 
   updateEngine() {
@@ -105,13 +109,14 @@ class GameController {
   }
 
   render() {
-    const { canvas, background, seeds, particles } = this
+    const { canvas, background, mouse, seeds, particles } = this
     const ctx = canvas.getContext('2d')
     ctx.clearRect(0, 0, canvas.width, canvas.height)
 
     background.render()
-    particles.render()
-    seeds.render()
+    // particles.render()
+
+    seeds.render(mouse)
   }
 
   onKeyDown({ code }) {
@@ -133,6 +138,7 @@ class GameController {
   onMouseMove(event) {
     this.ifNotPaused(event, () => {
       const { x, y } = event
+      this.mouse = { x, y }
       this.sound.tune(x, y)
     })
   }

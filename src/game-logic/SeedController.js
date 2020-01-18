@@ -1,6 +1,8 @@
 import { tick } from 'game-of-life'
 import SeedRenderer from './SeedRenderer'
 import sample from '../util/sample'
+import withContext from './canvas/withContext'
+import { getColour } from './canvas/shimmery'
 
 export const toggle = (bitmap, [i, j]) => {
   const copy = [].concat(bitmap)
@@ -31,9 +33,10 @@ const seedFactory = (translate, gridSize, width, height) =>
     row.map((cell, x) => new SeedRenderer(...translate(x, y), gridSize, cell))
   )
 
+const CELL_COLOUR = `rgba(255,255,255,0.4)`
 // Class for controlling interactive canvas to seed/play game of life
 class GameOfLife {
-  constructor(canvas, gridSize = 30) {
+  constructor(canvas, gridSize = 10) {
     this.canvas = canvas
     this.gridSize = gridSize
     this.translateXY = translateXY(gridSize)
@@ -77,10 +80,25 @@ class GameOfLife {
     )
   }
 
-  render() {
+  render(mouse = {}) {
+    const { x, y } = mouse
     const { canvas, seeds } = this
-    const ctx = canvas.getContext('2d')
-    seeds.forEach(row => row.forEach(seed => seed.render(ctx)))
+
+    withContext(canvas.getContext('2d'), ctx => {
+      ctx.fillStyle = CELL_COLOUR
+      ctx.strokeStyle = CELL_COLOUR
+      ctx.lineWidth = 1
+
+      if (x && y) {
+        const [j, i] = this.translateXY(x, y)
+        ctx.fillRect(...this.translateGrid(j, i), 32, 32)
+      }
+
+      seeds.forEach(row => row
+        .filter(cell => cell.isAlive)
+        .forEach(seed => seed.renderCircle(ctx))
+      )
+    })
   }
 }
 

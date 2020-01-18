@@ -40,20 +40,21 @@ class SeedRenderer extends ParticleRenderer {
     this.size = newSize(size)
   }
 
-  render(context) {
-    const { isAlive, size, opacity, x, y } = this
+  renderRect(ctx) {
+    const { isAlive, size, x, y } = this
+    const draw = isAlive ? 'fillRect' : 'strokeRect'
+    // ctx.strokeRect(x, y, size, size)
+    ctx.fillRect(x, y, size, size)
+  }
 
-    withContext(context, ctx => {
-      const draw = isAlive ? 'fillRect' : 'strokeRect'
-      const colour = getColour(opacity)
-      ctx.fillStyle = colour
-      ctx.strokeStyle = colour // `4px solid ${colour}`
+  renderCircle(ctx) {
+    const { isAlive, size, x, y } = this
 
-      ctx[draw](
-        x, y,
-        size, size
-      )
-    })
+    ctx.beginPath()
+    const half = size / 2
+
+    ctx.arc(x + half, y + half, 12,  0, 2 * Math.PI)
+    ctx.fill()
   }
 }
 
