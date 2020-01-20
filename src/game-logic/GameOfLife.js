@@ -2,6 +2,7 @@ import { Grid, GameOfLife as GoL } from 'grid-games'
 import SeedRenderer from './SeedRenderer'
 import sample from '../util/sample'
 import withContext from './canvas/withContext'
+import { translate } from './canvas/grid'
 import { getColour } from './canvas/shimmery'
 
 export const toggle = (bitmap, [i, j]) => {
@@ -11,31 +12,32 @@ export const toggle = (bitmap, [i, j]) => {
   return copy
 }
 
-export const translateXY = size => (x, y) => [
-  Math.floor(x / size),
-  Math.floor(y / size)
-]
-
-export const translateGrid = size => (i, j) => [
-  i * size,
-  j * size
-]
-
-const seedFactory = (translate, gridSize, width, height) =>
-  Grid.map(
-    Grid.blank(...translateXY(gridSize)(width, height)),
-    (cell, [i,j]) => new SeedRenderer(...translate(j, i), gridSize, cell)
+const seedFactory = (translate, gridSize, width, height) => {
+  const blank = Grid.blank(
+    translate.toGrid(width),
+    translate.toGrid(height),
   )
 
+  return Grid.map(
+    blank,
+    (cell, [i,j]) => new SeedRenderer(
+      translate.toPixel(j),
+      translate.toPixel(i),
+      gridSize,
+      cell
+    )
+  )
+}
+
 const CELL_COLOUR = `rgba(255,255,255,0.4)`
+
 // Class for controlling interactive canvas to seed/play game of life
 class GameOfLife {
   constructor(canvas, gridSize = 10) {
     this.canvas = canvas
     this.gridSize = gridSize
-    this.translateXY = translateXY(gridSize)
-    this.translateGrid = translateGrid(gridSize)
-    this.seeds = seedFactory(this.translateGrid, gridSize, canvas.width, canvas.height)
+    this.translate = translate(gridSize)
+    this.seeds = seedFactory(this.translate, gridSize, canvas.width, canvas.height)
     this.inProgress = false
   }
 
@@ -64,7 +66,8 @@ class GameOfLife {
   }
 
   toggle(x, y) {
-    const [j, i] = this.translateXY(x, y)
+    const i = this.translate.toGrid(y)
+    const j = this.translate.toGrid(x)
     this.seeds[i][j].toggle()
   }
 
@@ -76,7 +79,7 @@ class GameOfLife {
 
   render(mouse = {}) {
     const { x, y } = mouse
-    const { canvas, seeds } = this
+    const { canvas, seeds, translate } = this
 
     withContext(canvas.getContext('2d'), ctx => {
       ctx.fillStyle = CELL_COLOUR
@@ -84,8 +87,11 @@ class GameOfLife {
       ctx.lineWidth = 1
 
       if (x && y) {
-        const [j, i] = this.translateXY(x, y)
-        ctx.fillRect(...this.translateGrid(j, i), 32, 32)
+        ctx.fillRect(
+          translate.snapToGrid(x),
+          translate.snapToGrid(y),
+          32, 32
+        )
       }
 
       seeds.forEach(row => row
