@@ -2,8 +2,7 @@ import {
   toggle,
   translateXY,
   translateGrid,
-  blankBitmap
-} from './SeedController'
+} from './GameOfLife'
 
 describe('toggle', () => {
   it('switches cell on or off', () => {
@@ -60,41 +59,5 @@ describe('translateGrid', () => {
     expect(
       translate(3, 8)
     ).toMatchObject([150, 400])
-  })
-})
-
-describe('blankBitmap', () => {
-  it('generates 2D array of zeros for width and height', () => {
-    const gridsize = 50
-
-    expect(
-      blankBitmap(gridsize, 50, 50)
-    ).toMatchObject([
-      [0]
-    ])
-
-    expect(
-      blankBitmap(gridsize, 150, 200)
-    ).toMatchObject([
-      [0,0,0],
-      [0,0,0],
-      [0,0,0],
-      [0,0,0]
-    ])
-
-    expect(
-      blankBitmap(gridsize, 400, 500)
-    ).toMatchObject([
-      [0,0,0,0,0,0,0,0],
-      [0,0,0,0,0,0,0,0],
-      [0,0,0,0,0,0,0,0],
-      [0,0,0,0,0,0,0,0],
-      [0,0,0,0,0,0,0,0],
-      [0,0,0,0,0,0,0,0],
-      [0,0,0,0,0,0,0,0],
-      [0,0,0,0,0,0,0,0],
-      [0,0,0,0,0,0,0,0],
-      [0,0,0,0,0,0,0,0],
-    ])
   })
 })

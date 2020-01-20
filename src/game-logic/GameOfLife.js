@@ -1,4 +1,4 @@
-import { tick } from 'game-of-life'
+import { Grid, GameOfLife as GoL } from 'grid-games'
 import SeedRenderer from './SeedRenderer'
 import sample from '../util/sample'
 import withContext from './canvas/withContext'
@@ -21,16 +21,10 @@ export const translateGrid = size => (i, j) => [
   j * size
 ]
 
-export const blankBitmap = (gridSize, width, height) => {
-  const [i, j] = translateXY(gridSize)(width, height)
-  return Array.from({ length: j + 1 })
-    .fill(null)
-    .map(() => Array.from({ length: i + 1 }).fill(0))
-}
-
 const seedFactory = (translate, gridSize, width, height) =>
-  blankBitmap(gridSize, width, height).map((row, y) =>
-    row.map((cell, x) => new SeedRenderer(...translate(x, y), gridSize, cell))
+  Grid.map(
+    Grid.blank(...translateXY(gridSize)(width, height)),
+    (cell, [i,j]) => new SeedRenderer(...translate(j, i), gridSize, cell)
   )
 
 const CELL_COLOUR = `rgba(255,255,255,0.4)`
@@ -62,7 +56,7 @@ class GameOfLife {
 
   update() {
     const { seeds } = this
-    tick(
+    GoL.tick(
       seeds.map(row => row.map(cell => Number(cell.isAlive)))
     ).forEach((row, i) => row.forEach((cell, j) => {
       seeds[i][j].tick(cell)

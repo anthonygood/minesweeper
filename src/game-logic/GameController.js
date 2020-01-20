@@ -5,7 +5,7 @@ import { CANVAS_WIDTH, CANVAS_HEIGHT } from './canvas/sizes'
 import BackgroundController from './BackgroundController'
 import ParticleController from './ParticleController'
 import SoundController from './SoundController'
-import SeedController from './SeedController'
+import GameOfLife from './GameOfLife'
 
 const applyGravityWithScale = (scale = 0.001) => body => {
   const {
@@ -43,7 +43,7 @@ class GameController {
     // this.background = new BackgroundController(bkgCanvas, 255, 255, 231)
 
     this.particles = new ParticleController(world, canvas, bkgCanvas)
-    this.seeds = new SeedController(canvas, 32)
+    this.seeds = new GameOfLife(canvas, 32)
 
     addWalls(CANVAS_WIDTH, CANVAS_HEIGHT, world)
     this.registerEvents()
@@ -75,8 +75,7 @@ class GameController {
       paused,
       background,
       particles,
-      seeds,
-      mouse
+      seeds
     } = this
 
     if (!paused) {
