@@ -6,6 +6,7 @@ import BackgroundController from './BackgroundController'
 import ParticleController from './ParticleController'
 import SoundController from './SoundController'
 import GameOfLife from './GameOfLife'
+import Minesweeper from './Minesweeper'
 
 const applyGravityWithScale = (scale = 0.001) => body => {
   const {
@@ -43,7 +44,8 @@ class GameController {
     // this.background = new BackgroundController(bkgCanvas, 255, 255, 231)
 
     this.particles = new ParticleController(world, canvas, bkgCanvas)
-    this.seeds = new GameOfLife(canvas, 32)
+    // this.seeds = new GameOfLife(canvas, 32)
+    this.minesweeper = new Minesweeper(canvas)
 
     addWalls(CANVAS_WIDTH, CANVAS_HEIGHT, world)
     this.registerEvents()
@@ -83,7 +85,7 @@ class GameController {
 
       background.tick()
       particles.tick()
-      seeds.tick()
+      // seeds.tick()
 
       this.render()
     }
@@ -108,14 +110,15 @@ class GameController {
   }
 
   render() {
-    const { canvas, background, mouse, seeds, particles } = this
+    const { canvas, background, minesweeper, mouse, seeds, particles } = this
     const ctx = canvas.getContext('2d')
     ctx.clearRect(0, 0, canvas.width, canvas.height)
 
     background.render()
+    minesweeper.render(mouse)
     // particles.render()
 
-    seeds.render(mouse)
+    // seeds.render(mouse)
   }
 
   onKeyDown({ code }) {
@@ -126,7 +129,8 @@ class GameController {
 
   onClick(e) {
     const { x, y } = e
-    this.seeds.toggle(x, y)
+    // this.seeds.toggle(x, y)
+    this.minesweeper.move(x, y)
   }
 
   ifNotPaused(event, fn) {

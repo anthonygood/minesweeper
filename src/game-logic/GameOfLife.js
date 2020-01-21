@@ -5,11 +5,9 @@ import withContext from './canvas/withContext'
 import { translate } from './canvas/grid'
 import { getColour } from './canvas/shimmery'
 
-export const toggle = (bitmap, [i, j]) => {
-  const copy = [].concat(bitmap)
-  const value = bitmap[i][j]
-  copy[i][j] = Number(!value)
-  return copy
+export const toggle = (grid, [i, j]) => {
+  const value = grid[i][j]
+  grid[i][j] = Number(!value)
 }
 
 const seedFactory = (translate, gridSize, width, height) => {
