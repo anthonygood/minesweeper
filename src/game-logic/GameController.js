@@ -41,9 +41,7 @@ class GameController {
     this.engine = engine
     this.world = world
     this.background = new BackgroundController(bkgCanvas, 0,0,0, 255, 231)
-    // this.background = new BackgroundController(bkgCanvas, 255, 255, 231)
-
-    this.particles = new ParticleController(world, canvas, bkgCanvas)
+    this.particles = new ParticleController(world, bkgCanvas, bkgCanvas)
     // this.seeds = new GameOfLife(canvas, 32)
     this.minesweeper = new Minesweeper(canvas)
 
@@ -62,6 +60,8 @@ class GameController {
 
     // Mouse events
     canvas.addEventListener('click', event => this.onClick(event))
+    canvas.addEventListener('dblclick', event => this.onDblClick(event))
+
     canvas.addEventListener('mouseenter', event => this.onMouseEnter(event))
     canvas.addEventListener('mousemove', event => this.onMouseMove(event))
     canvas.addEventListener('mouseleave', event => this.onMouseLeave(event))
@@ -110,13 +110,15 @@ class GameController {
   }
 
   render() {
-    const { canvas, background, minesweeper, mouse, seeds, particles } = this
+    const { bkgCanvas, canvas, background, minesweeper, mouse, seeds, particles } = this
     const ctx = canvas.getContext('2d')
     ctx.clearRect(0, 0, canvas.width, canvas.height)
+    bkgCanvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height)
+
 
     background.render()
     minesweeper.render(mouse)
-    // particles.render()
+    particles.render()
 
     // seeds.render(mouse)
   }
@@ -124,13 +126,17 @@ class GameController {
   onKeyDown({ code }) {
     if (code === 'Enter') this.seeds.start()
     if (code === 'KeyQ')  this.seeds.random()
+    if (code === 'ShiftLeft' || code === 'ShiftRight') this.minesweeper.toggleFlag(this.mouse)
     return code === 'Space' && this.togglePause()
   }
 
-  onClick(e) {
-    const { x, y } = e
+  onClick({ x, y }) {
     // this.seeds.toggle(x, y)
     this.minesweeper.move(x, y)
+  }
+
+  onDblClick({ x, y }) {
+    this.minesweeper.clearRadius(x, y)
   }
 
   ifNotPaused(event, fn) {

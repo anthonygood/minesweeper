@@ -1,42 +1,66 @@
 import { Grid, Minesweeper } from 'grid-games'
 import { translate } from './canvas/grid'
-
-class Class {
-  constructor(x, y) {
-    this.x = x,
-    this.y = y
-  }
-}
+import withContext from './canvas/withContext'
 
 class MinesweeperController {
   constructor(canvas, cellSize = 50) {
     this.canvas = canvas
     this.cellSize = cellSize
-    const { toGrid } = this.translate = translate(cellSize)
-
-    const { width, height } = canvas
-    const gWidth = toGrid(width)
-    const gHeight = toGrid(height)
-    // TODO: mine count logic
-    //  width * height * 0.15
-    this.game = new Minesweeper(gWidth, gHeight, 45)
-    this.blank = Grid.blank(gWidth, gHeight)
+    this.translate = translate(cellSize)
+    this.newGame()
   }
 
-  move(x, y) {
-    const i = this.translate.toGrid(y)
-    const j = this.translate.toGrid(x)
+  move(x, y, restartIfDead = true) {
+    const { flags, struckMines, game, translate } = this
+    if (restartIfDead && struckMines.length) return this.newGame()
 
-    if (i >= this.blank.length) return
-    this.game.move(i, j)
+    const i = translate.toGrid(y)
+    const j = translate.toGrid(x)
+
+    if (i >= flags.length || flags[i][j]) return
+    if (!game.move(i, j)) this.struckMines.push([translate.snapToGrid(x), translate.snapToGrid(y)])
+  }
+
+  clearRadius(x, y) {
+    const { flags, translate } = this
+    const i = translate.toGrid(y)
+    const j = translate.toGrid(x)
+    Grid.forEveryNeighbour([i, j], flags, (isFlagged, i, j) => {
+      if (isFlagged) return
+      this.move(
+        translate.toPixel(j),
+        translate.toPixel(i),
+        false
+      )
+    })
+  }
+
+  toggleFlag({ x, y }) {
+    const { game, flags, struckMines, translate } = this
+    if (!flags.length || struckMines.length) return
+
+    const i = translate.toGrid(y)
+    const j = translate.toGrid(x)
+
+    if (i >= flags.length || game.state[i][j] !== -1) return
+    this.flags[i][j] = !flags[i][j]
+  }
+
+  newGame() {
+    const { canvas, translate } = this
+    const { width, height } = canvas
+    const gWidth = translate.toGrid(width)
+    const gHeight = translate.toGrid(height)
+    this.struckMines = []
+    this.game = new Minesweeper(gWidth, gHeight, 45)
+    this.flags = Grid.blank(gWidth, gHeight, false)
   }
 
   render(mouse) {
     const { game, canvas } = this
     const ctx = canvas.getContext('2d')
     ctx.strokeStyle = 'white'
-    // ctx.fillStyle = 'white'
-    ctx.fillStyle = 'rgba(255,255,255,0.2)'
+    ctx.fillStyle = 'rgba(255,255,255,0.1)'
     ctx.font = 'bold 56px sans-serif'
 
     if (!game.board) {
@@ -45,31 +69,23 @@ class MinesweeperController {
       this.renderCells(ctx)
       ctx.fillStyle = 'black'
       this.renderFog(ctx)
+      ctx.fillStyle = 'blue'
+      this.renderFlags(ctx)
       ctx.fillStyle = 'rgba(255,255,255,0.2)'
     }
 
     this.renderMouse(ctx, mouse)
+    this.renderDead(ctx)
   }
 
   renderBlank(ctx) {
-    const { cellSize, blank, translate } = this
-
-    // blank.forEach(
-    //   (row, i) => row.forEach(
-    //     (_cell, j) => ctx.strokeRect(
-    //       translate.toPixel(j),
-    //       translate.toPixel(i),
-    //       cellSize,
-    //       cellSize
-    //     )
-    //   )
-    // )
+    // no-op
   }
 
   renderCells(ctx) {
-    const { cellSize, game, translate } = this
+    const { cellSize, flags, game, translate } = this
     // TODO add forEach to Grid for better semantics
-    Grid.map(game.state, (value, [i,j], row, grid) => {
+    Grid.map(game.state, (value, [i,j]) => {
       const x = translate.toPixel(j)
       const y = translate.toPixel(i)
 
@@ -82,9 +98,22 @@ class MinesweeperController {
     })
   }
 
+  renderFlags(ctx) {
+    const { cellSize, flags, translate } = this
+    Grid.map(flags, (isFlagged, [i,j]) => {
+      if (!isFlagged) return
+
+      ctx.fillRect(
+        translate.toPixel(j),
+        translate.toPixel(i),
+        cellSize, cellSize
+      )
+    })
+  }
+
   renderFog(ctx) {
     const { cellSize, game, translate } = this
-    Grid.map(game.state, (value, [i,j], row, grid) => {
+    Grid.map(game.state, (value, [i,j]) => {
       const x = translate.toPixel(j)
       const y = translate.toPixel(i)
 
@@ -102,6 +131,16 @@ class MinesweeperController {
         cellSize, cellSize
       )
     }
+  }
+
+  renderDead(_ctx) {
+    const { canvas, cellSize, struckMines } = this
+    if (!struckMines.length) return
+
+    withContext(canvas.getContext('2d'), ctx => {
+      ctx.fillStyle = 'red'
+      struckMines.forEach(([x, y]) => ctx.fillRect(x, y, cellSize, cellSize))
+    })
   }
 }
 
