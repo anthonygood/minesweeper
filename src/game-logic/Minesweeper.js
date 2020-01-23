@@ -10,6 +10,17 @@ class MinesweeperController {
     this.newGame()
   }
 
+  isComplete() {
+    const { game } = this
+    const { state, mineCount } = game
+    const unswept = Grid
+      .flatten(state)
+      .filter(value => value === -1)
+      .reduce((a, b) => a + b)
+
+    return -mineCount === unswept
+  }
+
   move(x, y, restartIfDead = true) {
     const { flags, struckMines, game, translate } = this
     if (restartIfDead && struckMines.length) return this.newGame()
@@ -19,6 +30,7 @@ class MinesweeperController {
 
     if (i >= flags.length || flags[i][j]) return
     if (!game.move(i, j)) this.struckMines.push([translate.snapToGrid(x), translate.snapToGrid(y)])
+    if (this.isComplete()) console.log('finissed')
   }
 
   clearRadius(x, y) {
