@@ -13,7 +13,7 @@ const setupMatterJs = canvas => {
     // gravity: { scale: 0.0001 }
   })
   const engine = Engine.create({
-    timing: { timeScale: 0.4 },
+    timing: { timeScale: 0.75 },
     enableSleeping: true,
     world,
   })

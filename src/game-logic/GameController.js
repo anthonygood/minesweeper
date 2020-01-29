@@ -35,15 +35,13 @@ class GameController {
   }
 
   async start(canvas, bkgCanvas) {
-    const { engine, world } = setup(canvas)
+    const { world } = this.matter = setup(canvas)
     this.canvas = canvas
     this.bkgCanvas = bkgCanvas
-    this.engine = engine
-    this.world = world
     this.background = new BackgroundController(bkgCanvas, 0,0,0, 255, 231)
-    this.particles = new ParticleController(world, bkgCanvas, bkgCanvas)
+    // this.particles = new ParticleController(world, bkgCanvas, bkgCanvas)
     // this.seeds = new GameOfLife(canvas, 32)
-    this.minesweeper = new Minesweeper(canvas)
+    this.minesweeper = new Minesweeper(bkgCanvas, world)
 
     addWalls(CANVAS_WIDTH, CANVAS_HEIGHT, world)
     this.registerEvents()
@@ -83,8 +81,8 @@ class GameController {
     if (!paused) {
       this.updateEngine()
 
-      background.tick()
-      particles.tick()
+      // background.tick()
+      // particles.tick()
       // seeds.tick()
 
       this.render()
@@ -100,7 +98,7 @@ class GameController {
 
   updateEngine() {
     const {
-      engine,
+      matter: { engine },
       lastTick = Date.now()
     } = this
     const thisTick = Date.now()
@@ -110,15 +108,26 @@ class GameController {
   }
 
   render() {
-    const { bkgCanvas, canvas, background, minesweeper, mouse, seeds, particles } = this
-    const ctx = canvas.getContext('2d')
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-    bkgCanvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height)
+    const {
+      bkgCanvas,
+      canvas,
+      background,
+      minesweeper,
+      mouse,
+      matter: { render },
+      seeds,
+      particles
+    } = this
 
+    bkgCanvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height)
+    Render.world(render)
+
+    const ctx = bkgCanvas.getContext('2d')
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
 
     background.render()
     minesweeper.render(mouse)
-    particles.render()
+    // particles.render()
 
     // seeds.render(mouse)
   }
