@@ -1,29 +1,11 @@
-import { Composite, Engine, Render } from 'matter-js'
+import { Engine, Render } from 'matter-js'
 import decomp from 'poly-decomp'
+import SimplexNoise from 'simplex-noise'
 import { addWalls, setup } from '../matter'
 import { CANVAS_WIDTH, CANVAS_HEIGHT } from './canvas/sizes'
 import BackgroundController from './BackgroundController'
-import ParticleController from './ParticleController'
 import SoundController from './SoundController'
-import GameOfLife from './GameOfLife'
 import Minesweeper from './Minesweeper'
-
-const applyGravityWithScale = (scale = 0.001) => body => {
-  const {
-    isStatic,
-    isSleeping,
-    plugin: { gravity: bodyOptions = {} }
-  } = body
-
-  const { scale: bodyGravityScale = 1 } = bodyOptions
-
-  if (isStatic || isSleeping) return
-
-  body.force.y += body.mass * (scale * bodyGravityScale)
-}
-
-const scaleGravity = (world, scale) => () =>
-  Composite.allBodies(world).forEach(applyGravityWithScale(scale))
 
 class GameController {
   constructor() {
@@ -32,6 +14,7 @@ class GameController {
     window.controller = this
     this.paused = false
     this.sound = new SoundController()
+    this.noise = new SimplexNoise()
   }
 
   async start(canvas, bkgCanvas) {
@@ -39,13 +22,12 @@ class GameController {
     this.canvas = canvas
     this.bkgCanvas = bkgCanvas
     this.background = new BackgroundController(bkgCanvas, 0,0,0, 255, 231)
-    // this.particles = new ParticleController(world, bkgCanvas, bkgCanvas)
-    // this.seeds = new GameOfLife(canvas, 32)
-    this.minesweeper = new Minesweeper(bkgCanvas, world)
+    this.minesweeper = new Minesweeper(bkgCanvas, world, this.noise)
 
     addWalls(CANVAS_WIDTH, CANVAS_HEIGHT, world)
     this.registerEvents()
-    this.tick()
+
+    requestAnimationFrame(dt => this.tick(dt))
 
     return this
   }
@@ -70,53 +52,31 @@ class GameController {
     canvas.addEventListener('touchend', event => this.onMouseLeave(event))
   }
 
-  tick() {
+  tick(dt) {
     const {
       paused,
-      background,
-      particles,
-      seeds
-    } = this
-
-    if (!paused) {
-      this.updateEngine()
-
-      // background.tick()
-      // particles.tick()
-      // seeds.tick()
-
-      this.render()
-    }
-
-    // setTimeout(
-    //   () => this.tick(),
-    //   1000 / 12
-    // )
-
-    requestAnimationFrame(() => this.tick())
-  }
-
-  updateEngine() {
-    const {
       matter: { engine },
       lastTick = Date.now()
     } = this
-    const thisTick = Date.now()
-    const delta = Math.min(thisTick - lastTick, 1000)
-    this.lastTick = thisTick
-    Engine.update(engine, delta)
+
+    if (!paused) {
+      const delta = Math.min(dt - lastTick, 1000)
+      this.lastTick = dt
+      Engine.update(engine, delta)
+      this.render(delta)
+    }
+    requestAnimationFrame(dt => this.tick(dt))
   }
 
-  render() {
+  render(dt) {
     const {
       bkgCanvas,
       canvas,
       background,
+      lastTick,
       minesweeper,
       mouse,
-      matter: { render },
-      seeds,
-      particles
+      matter: { render }
     } = this
 
     bkgCanvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height)
@@ -126,10 +86,7 @@ class GameController {
     ctx.clearRect(0, 0, canvas.width, canvas.height)
 
     background.render()
-    minesweeper.render(mouse)
-    // particles.render()
-
-    // seeds.render(mouse)
+    minesweeper.render(mouse, dt, lastTick)
   }
 
   onKeyDown({ code }) {
@@ -140,7 +97,6 @@ class GameController {
   }
 
   onClick({ x, y }) {
-    // this.seeds.toggle(x, y)
     this.minesweeper.move(x, y)
   }
 

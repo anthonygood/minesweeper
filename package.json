@@ -9,6 +9,7 @@
     "poly-decomp": "^0.3.0",
     "react": "^16.4.2",
     "react-dom": "^16.4.2",
+    "simplex-noise": "^2.4.0",
     "vectorize-text": "^3.0.2"
   },
   "devDependencies": {
