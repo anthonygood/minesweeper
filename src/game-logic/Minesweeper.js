@@ -3,11 +3,13 @@ import { translate } from './canvas/grid'
 import sample from '../util/sample'
 import nTimes from '../util/nTimes'
 import withContext from './canvas/withContext'
-import { Body, Bodies, World } from 'matter-js'
+import { Body, Bodies, Sleeping, Vector, World } from 'matter-js'
 
 const COLOUR = 'cyan'
-const DANGER = 'rgb(255,150,255)'
+const DANGER = 'white'
 const FONT = 'bold 56px sans-serif'
+
+const font = cellSize => `bold ${cellSize * 1.12}px sans-serif`
 
 class MinesweeperController {
   constructor(mainCanvas, world, noise, cellSize = 50) {
@@ -41,7 +43,7 @@ class MinesweeperController {
 
     if (i >= flags.length || flags[i][j]) return
     if (!game.move(i, j)) return this.killPlayer(x, y)
-    if (this.isComplete()) console.log('finissed')
+    if (this.isComplete()) console.log('finissed') // TODO
   }
 
   killPlayer(x, y) {
@@ -78,25 +80,26 @@ class MinesweeperController {
   newGame() {
     const { bodies, canvas, translate, world } = this
     const { width, height } = canvas
-    const gWidth = translate.toGrid(width)
-    const gHeight = translate.toGrid(height)
+    const gWidth = translate.toGrid(width) + 1
+    const gHeight = translate.toGrid(height) + 1
     this.struckMines = []
-    this.game = new Minesweeper(gWidth, gHeight, 45)
+    const defaultMines = Math.floor((gWidth * gHeight) / 5)
+    this.game = new Minesweeper(gWidth, gHeight, defaultMines)
     this.flags = Grid.blank(gWidth, gHeight, false)
-    World.remove(world, bodies)
+    bodies.forEach(body => World.remove(world, body))
   }
 
   isDead() {
     return !!this.struckMines.length
   }
 
-  render(mouse, dt, time) {
-    const { game, canvas } = this
+  render(mouse, dt) {
+    const { cellSize, game, canvas } = this
 
     withContext(canvas.getContext('2d'), ctx => {
       ctx.strokeStyle = COLOUR
       ctx.fillStyle = COLOUR
-      ctx.font = FONT
+      ctx.font = font(cellSize)
 
       if (!game.board) {
         this.renderBlank(ctx)
@@ -115,11 +118,15 @@ class MinesweeperController {
   }
 
   renderBlank(ctx) {
-    // no-op
+    const { canvas: { height, width } } = this
+    withContext(ctx, ctx => {
+      ctx.fillStyle = 'white'
+      ctx.fillRect(0, 0, width, height)
+    })
   }
 
   renderCells(ctx, dt) {
-    this.increment += dt / 500
+    this.increment += dt / 1000
     const { cellSize, game, increment, noise, translate } = this
     const board = this.isDead() ? game.board : game.state
     Grid.forEach(board, (value, [i,j]) => {
@@ -127,7 +134,7 @@ class MinesweeperController {
       const y = translate.toPixel(i)
       const n = noise.noise3D(x, y, increment)
       const between0and1 = (n + 1) / 2
-      const opacity = 0.3 + (between0and1 * .15)
+      const opacity = 0.7 + (between0and1 * .15)
       ctx.globalAlpha = opacity
 
       if (value > -1) {
@@ -174,14 +181,14 @@ class MinesweeperController {
   renderFog(ctx) {
     const { cellSize, game, translate } = this
     withContext(ctx, ctx => {
-      ctx.fillStyle = 'black'
+      ctx.fillStyle = 'white'
+      ctx.globalAlpha = 1
       Grid.map(game.state, (value, [i,j]) => {
         if (value !== -1) return
         const x = translate.toPixel(j)
         const y = translate.toPixel(i)
+
         ctx.fillRect(x, y, cellSize, cellSize)
-        nTimes(sample(2,2.5,3))
-          .do(() => ctx.strokeRect(x, y, cellSize, cellSize))
       })
     })
   }
@@ -207,27 +214,53 @@ class MinesweeperController {
   }
 
   explode(deadX, deadY) {
-    const { canvas, cellSize, game, translate, world } = this
-    const { width, height } = canvas
+    const { cellSize, game, translate, world } = this
     const bodies = []
-    withContext(canvas.getContext('2d'), ctx => {
-      Grid.forEach(game.state, (cell, [i,j]) => {
-        if (cell !== -1) return
 
-        const x = translate.toPixel(j)
-        const y = translate.toPixel(i)
+    const inBlastzone = (i, j, i2, j2) => (blastRadius = 4) =>
+      (i2 > i - blastRadius && i2 < i + blastRadius) &&
+      (j2 > j - blastRadius && j2 < j + blastRadius)
 
-        const body = Bodies.rectangle(x, y, cellSize, cellSize, {
-          render: { fillStyle: 'black' }
-        })
+    Grid.forEach(game.state, (cell, [i,j]) => {
+      if (cell !== -1) return
 
-        const ratioX = x / width
-        const ratioY = y / height
-        Body.applyForce(body, { x: deadX, y: deadY }, { x: ratioX / 10, y: ratioY / 10 })
+      const struckMineI = translate.toGrid(deadY)
+      const struckMineJ = translate.toGrid(deadX)
 
-        bodies.push(body)
+      if (i === struckMineI && j === struckMineJ) return
+
+      const x = translate.toPixel(j)
+      const y = translate.toPixel(i)
+
+      const body = Bodies.rectangle(x + cellSize / 2, y + cellSize / 2, cellSize, cellSize, {
+        render: { fillStyle: 'white' },
       })
+
+      bodies.push(body)
+
+      const blastzone = inBlastzone(struckMineI, struckMineJ, i, j)
+
+      if (blastzone(6)) {
+        const deltaV  = Vector.sub({ x: deadX, y: deadY }, body.position)
+        const normalV = Vector.normalise(deltaV)
+        const suck    = Vector.div(normalV, 15)
+        const blow    = Vector.mult(Vector.neg(suck), 3)
+
+        if (blastzone(4)) {
+          Body.applyForce(body, { x: deadX, y: deadY }, suck)
+          setTimeout(
+            () => Body.applyForce(body, { x: deadX, y: deadY }, blow),
+            150
+          )
+        }
+
+        setTimeout(
+          () => Body.applyForce(body, { x: deadX, y: deadY }, blow),
+          1500
+        )
+      }
     })
+
 
     World.add(world, bodies)
     this.bodies = bodies // for garbage collection
