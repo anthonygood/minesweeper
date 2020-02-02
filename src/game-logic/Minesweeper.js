@@ -1,13 +1,12 @@
 import { Grid, Minesweeper } from 'grid-games'
 import { translate } from './canvas/grid'
-import sample from '../util/sample'
 import nTimes from '../util/nTimes'
 import withContext from './canvas/withContext'
-import { Body, Bodies, Sleeping, Vector, World } from 'matter-js'
+import { Body, Bodies, Vector, World } from 'matter-js'
 
 const COLOUR = 'cyan'
+const FLAG = 'rgb(255,100,200)'
 const DANGER = 'white'
-const FONT = 'bold 56px sans-serif'
 
 const font = cellSize => `bold ${cellSize * 1.12}px sans-serif`
 
@@ -105,6 +104,7 @@ class MinesweeperController {
         this.renderBlank(ctx)
       } else {
         this.renderCells(ctx, dt)
+        this.renderCounts(ctx)
         this.isDead() ? this.renderMines(ctx) : this.renderFog(ctx)
 
         this.renderFlags(ctx)
@@ -134,23 +134,39 @@ class MinesweeperController {
       const y = translate.toPixel(i)
       const n = noise.noise3D(x, y, increment)
       const between0and1 = (n + 1) / 2
-      const opacity = 0.7 + (between0and1 * .15)
+      const opacity = 0.725 + (between0and1 * .15)
       ctx.globalAlpha = opacity
 
       if (value > -1) {
         ctx.fillRect(x, y, cellSize, cellSize)
         ctx.strokeRect(x, y, cellSize, cellSize)
       }
+    })
+  }
 
-      for (let i = 0; i < value; i++) {
-        (value !== -1) && ctx.fillText(value, x, y + cellSize, cellSize)
-      }
+  renderCounts(ctx) {
+    const { cellSize, game, translate } = this
+    const board = this.isDead() ? game.board : game.state
+    withContext(ctx, ctx => {
+      ctx.fillStyle = 'white'
+      ctx.globalAlpha = 0.3
+
+      Grid.forEach(board, (value, [i,j]) => {
+        if (value === -1) return
+        const x = translate.toPixel(j)
+        const y = translate.toPixel(i)
+
+        nTimes(value).do(
+          () => ctx.fillText(value, x, y + cellSize, cellSize)
+        )
+      })
     })
   }
 
   renderFlags(ctx) {
     const { cellSize, flags, translate } = this
     withContext(ctx, ctx => {
+      ctx.fillStyle = FLAG
       ctx.globalAlpha = 0.9
       Grid.map(flags, (isFlagged, [i,j]) => {
         if (!isFlagged) return
@@ -260,7 +276,6 @@ class MinesweeperController {
         )
       }
     })
-
 
     World.add(world, bodies)
     this.bodies = bodies // for garbage collection
